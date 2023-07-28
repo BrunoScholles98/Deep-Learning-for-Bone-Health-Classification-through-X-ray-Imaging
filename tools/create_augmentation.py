@@ -3,10 +3,10 @@ import cv2
 import random
 
 # Caminho para a pasta de treino
-pasta_treino = "/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_RB_CVAT_Train_Saudavel_DoenteGeral_Croped_600x600/train"
+pasta_treino = "/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C2C3/train"
 
 # Porcentagem do dataset a ser aumentado (30% no seu caso)
-percentual_aumento = 0.5
+percentual_aumento = 0.99
 
 # Função para realizar a augmentação das imagens
 def realizar_augmentacao(imagem, destino, nome_imagem):

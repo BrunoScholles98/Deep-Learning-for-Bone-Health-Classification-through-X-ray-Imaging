@@ -3,21 +3,21 @@ import random
 import shutil
 
 # Caminho da pasta com as subpastas de labels
-pasta_principal = '/d01/scholles/gigasistemica/datasets/CVAT_raw/RAW_Osteo_CVAT_Croped'
+pasta_principal = '/d01/scholles/gigasistemica/datasets/CVAT_raw/NEW_RB_CVAT_Osto'
 
 # Caminho da pasta de destino para as imagens de treinamento
-pasta_treinamento = '/d01/scholles/gigasistemica/datasets/CVAT_train/CVAT_Train_Saudavel_Doente_Grave_Croped_600x600/train'
+pasta_treinamento = '/d01/scholles/gigasistemica/datasets/CVAT_train/roll_ball_only/NEW_RB_CVAT_Train_FULL_IMG_C1_C2_C3/train'
 
 # Caminho da pasta de destino para as imagens de validação
-pasta_validacao = '/d01/scholles/gigasistemica/datasets/CVAT_train/CVAT_Train_Saudavel_Doente_Grave_Croped_600x600/val'
+pasta_validacao = '/d01/scholles/gigasistemica/datasets/CVAT_train/roll_ball_only/NEW_RB_CVAT_Train_FULL_IMG_C1_C2_C3/val'
 
 # Caminho da pasta de destino para as imagens de teste
-pasta_teste = '/d01/scholles/gigasistemica/datasets/CVAT_train/CVAT_Train_Saudavel_Doente_Grave_Croped_600x600/test'
+pasta_teste = '/d01/scholles/gigasistemica/datasets/CVAT_train/roll_ball_only/NEW_RB_CVAT_Train_FULL_IMG_C1_C2_C3/test'
 
 # Porcentagem de imagens para treinamento, validação e teste (80%, 10%, 10%)
-percent_treinamento = 0.8
-percent_validacao = 0.1
-percent_teste = 0.1
+percent_treinamento = 0.83
+percent_validacao = 0.16
+percent_teste = 0.01
 
 # Percorre as subpastas na pasta principal
 for label in os.listdir(pasta_principal):

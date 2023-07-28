@@ -3,7 +3,7 @@ from cv2_rolling_ball import subtract_background_rolling_ball
 from matplotlib import pyplot as plt
 
 output_path = '/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/tools/image_folder_test_cv/'
-image_path = "/d01/scholles/gigasistemica/datasets/CVAT_raw/RAW_Osteo_CVAT_Croped/C1/OPHUB2019-398[1767.31, 999.82, 475.85, 83.18].jpg"
+image_path = "/d01/scholles/gigasistemica/datasets/CVAT_train/default/CVAT_Train_FULL_IMG_Saudavel_DoenteGeral/train/C1/OPHUB2015-82.jpg"
 #image_path= '/d01/scholles/gigasistemica/datasets/CVAT_train/CVAT_Train_Saudavel_Grave_Croped_600x600/train/Saudavel/img_OPHUB2015-77.jpg_bbox_[721.07, 1124.36, 378.42, 76.73].jpg'
 
 # Read the image
