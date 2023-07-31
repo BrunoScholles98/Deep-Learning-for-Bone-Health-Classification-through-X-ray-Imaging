@@ -13,24 +13,15 @@ from efficientnet_pytorch import EfficientNet
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 
-from sklearn.metrics import classification_report, precision_recall_fscore_support, accuracy_score
+from sklearn.metrics import classification_report
 from PIL import Image
 import tqdm
 
+import utils
+
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-# Paths
-TRAIN_NAME = 'AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C2C3_Batch4_100Ep'
-DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C2C3')
-OUTPUT_PATH = Path('/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/results/' + TRAIN_NAME)
-MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '.pth')
-OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
-TENSORBOARD_LOG = OUTPUT_PATH / 'log'
-STATS_PATH = OUTPUT_PATH / 'stats.txt'
-IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3/test/C3/OPHUB2017-0046.jpg'
-
 # Caracteristicas do Treinamento
-NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH / 'train').iterdir() if subfolder.is_dir()])
 MODEL = 'efficientnet-b7'
 BATCH_SIZE = 4
 EPOCHS = 100
@@ -38,6 +29,18 @@ LOG_INTERVAL = 10
 PERS_RESIZE_NUM = 3
 REDUCELRONPLATEAU = True
 PERSONALIZED_RESIZE = True
+
+# Paths
+DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C2C3')
+TRAIN_NAME = utils.generate_training_name(MODEL, DATASET_PATH, BATCH_SIZE, EPOCHS)
+OUTPUT_PATH = Path('/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/results/' + TRAIN_NAME)
+MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '.pth')
+OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
+TENSORBOARD_LOG = OUTPUT_PATH / 'log'
+STATS_PATH = OUTPUT_PATH / 'stats.txt'
+IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3/test/C3/OPHUB2017-0046.jpg'
+
+NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH / 'train').iterdir() if subfolder.is_dir()])
 
 if PERSONALIZED_RESIZE == True:
     RESIZE = ((lambda img: (img.size[1] // PERS_RESIZE_NUM, img.size[0] // PERS_RESIZE_NUM))(Image.open(IMG_RESIZE_PATH)))

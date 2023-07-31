@@ -1,15 +1,40 @@
 import cv2
 import json
 import os
+from tqdm import tqdm
+from PIL import Image
+import numpy as np
+
+def obter_dimensoes_recorte(caminho_imagem):
+    # Valores padrão para o cálculo
+    default_n_pixels = 3859324
+    default_crop_n_pixels = 360000
+    
+    # Abre a imagem usando a biblioteca PIL
+    imagem = Image.open(caminho_imagem)
+    
+    # Obtém as dimensões da imagem (largura x altura)
+    largura, altura = imagem.size
+    
+    # Calcula o número total de pixels na imagem
+    img_n_pixels = largura * altura
+        
+    # Calcula o número de pixels para o recorte desejado
+    n_pixels_corte = (default_crop_n_pixels * img_n_pixels) / default_n_pixels
+    
+    # Calcula o tamanho do recorte em pixels
+    tam_recorte = int(np.sqrt(n_pixels_corte))
+    
+    return tam_recorte
 
 # Caminho para o arquivo COCO JSON contendo as informações das bounding boxes
-coco_json_path = "/d01/scholles/other/datasets/CVAT_raw/RAW_Osteo_CVAT/C3/annotations/instances_default.json"
+coco_json_path = "/d01/scholles/gigasistemica/datasets/CVAT_raw/NEW_CVAT_Osteo/C2/annotations/instances_default.json"
 
 # Caminho para a pasta onde as imagens originais estão armazenadas
-imagens_pasta = "/d01/scholles/other/datasets/CVAT_raw/RAW_Osteo_CVAT/C3/images"
+imagens_pasta = "/d01/scholles/gigasistemica/datasets/CVAT_raw/NEW_CVAT_Osteo/C2/images"
 
 # Caminho para a pasta onde as imagens recortadas serão salvas
-salvar_pasta = "/d01/scholles/other/datasets/CVAT_raw/RAW_Osteo_CVAT_Croped_Angled/C3/"
+salvar_pasta = "/d01/scholles/gigasistemica/datasets/CVAT_raw/RAW_NEW_CVAT_C1_C2_C3_Cropped_600x600/C2"
 
 # Tamanho desejado para as imagens recortadas
 tamanho_recorte = 600
@@ -18,8 +43,8 @@ tamanho_recorte = 600
 with open(coco_json_path, "r") as f:
     coco_data = json.load(f)
 
-# Iterar sobre as imagens do dataset
-for img_info in coco_data["images"]:
+# Iterar sobre as imagens do dataset com a barra de progresso
+for img_info in tqdm(coco_data["images"], desc="Recortando imagens"):
     img_id = img_info["id"]
     img_filename = img_info["file_name"]
     img_path = os.path.join(imagens_pasta, img_filename)
@@ -36,11 +61,19 @@ for img_info in coco_data["images"]:
         centro_x = int(x + w / 2)
         centro_y = int(y + h / 2)
 
+        # Verifica se o nome do arquivo contém "OPRAD"
+        if "OPRAD" in img_filename:
+            # Obter o tamanho de recorte personalizado
+            tam_recorte = obter_dimensoes_recorte(img_path)
+        else:
+            # Usar o tamanho de recorte padrão para as demais imagens
+            tam_recorte = tamanho_recorte
+
         # Calcular as coordenadas para o recorte
-        x_recorte = max(0, centro_x - tamanho_recorte // 2)
-        y_recorte = max(0, centro_y - tamanho_recorte // 2)
-        w_recorte = tamanho_recorte
-        h_recorte = tamanho_recorte
+        x_recorte = max(0, centro_x - tam_recorte // 2)
+        y_recorte = max(0, centro_y - tam_recorte // 2)
+        w_recorte = tam_recorte
+        h_recorte = tam_recorte
 
         # Recortar a imagem
         img_recortada = img[y_recorte:y_recorte + h_recorte, x_recorte:x_recorte + w_recorte]
@@ -53,6 +86,6 @@ for img_info in coco_data["images"]:
         caminho_salvar = os.path.join(salvar_pasta, nome_salvar)
         cv2.imwrite(caminho_salvar, img_recortada)
 
-        print(f"Imagem recortada {nome_salvar} salva.")
+        #print(f"Imagem recortada {nome_salvar} salva.")
 
 print("Conclusão do processo de recorte de imagens.")

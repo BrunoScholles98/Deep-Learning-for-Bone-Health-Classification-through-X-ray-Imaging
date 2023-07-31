@@ -17,11 +17,24 @@ from sklearn.metrics import classification_report, precision_recall_fscore_suppo
 from PIL import Image
 import tqdm
 
+import utils
+
+os.system('cls' if os.name == 'nt' else 'clear')
+
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+# Caracteristicas do Treinamento
+MODEL = 'efficientnet-b6'
+BATCH_SIZE = 8
+EPOCHS = 300
+LOG_INTERVAL = 10
+PERS_RESIZE_NUM = 3
+REDUCELRONPLATEAU = True
+PERSONALIZED_RESIZE = False
+
 # Paths
-TRAIN_NAME = 'AUG_RB_CVAT_Train_Saudavel_DoenteGeral_Croped_600x600_Batch4_100Ep'
-DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_RB_CVAT_Train_Saudavel_DoenteGeral_Croped_600x600')
+DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_RB_NEW_CVAT_C1_C2C3_Cropped_600x600')
+TRAIN_NAME = utils.generate_training_name(MODEL, DATASET_PATH, BATCH_SIZE, EPOCHS)
 OUTPUT_PATH = Path('/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/results/' + TRAIN_NAME)
 MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '.pth')
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
@@ -31,13 +44,6 @@ IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/da
 
 # Caracteristicas do Treinamento
 NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH / 'train').iterdir() if subfolder.is_dir()])
-MODEL = 'efficientnet-b7'
-BATCH_SIZE = 4
-EPOCHS = 100
-LOG_INTERVAL = 10
-PERS_RESIZE_NUM = 4
-REDUCELRONPLATEAU = True
-PERSONALIZED_RESIZE = False
 
 if PERSONALIZED_RESIZE == True:
     RESIZE = ((lambda img: (img.size[0] // PERS_RESIZE_NUM, img.size[1] // PERS_RESIZE_NUM))(Image.open(IMG_RESIZE_PATH)))
@@ -149,7 +155,13 @@ def run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_dl, va
         writer.add_scalar('Validation/Epoch_Loss', mean_loss_validation, epoch)
         writer.add_scalar('Validation/Epoch_Accuracy', val_epoch_accuracy, epoch)
 
+        # Checkpoint a cada 10 epocas
+        if epoch % 10 == 0:
+            torch.save(model.state_dict(), MODEL_SAVING_PATH)
+        
         scheduler.step(mean_loss_train)
+        
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def test_model(model, test_loader):
@@ -166,7 +178,7 @@ def test_model(model, test_loader):
             y_true += labels.cpu().numpy().tolist()
             y_pred += predicted.cpu().numpy().tolist()
     
-    report = classification_report(y_true, y_pred)
+    report = classification_report(y_true, y_pred, digits=4)
     print(report)
 
     # Abra um arquivo de texto para escrita

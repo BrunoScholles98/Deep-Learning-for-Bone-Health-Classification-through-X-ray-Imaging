@@ -31,6 +31,6 @@ def transform_images_in_folder(input_folder, output_folder):
                 cv2.imwrite(output_image_path, final_img)
 
 if __name__ == '__main__':
-    input_folder = "/d01/scholles/gigasistemica/other_tools/temp"
-    output_folder = "/d01/scholles/gigasistemica/other_tools/temp-RB"
+    input_folder = "/d01/scholles/gigasistemica/datasets/CVAT_raw/RAW_NEW_CVAT_C1_C2_C3_Cropped_600x600/C2"
+    output_folder = "/d01/scholles/gigasistemica/datasets/CVAT_raw/RB_RAW_NEW_CVAT_C1_C2_C3_Cropped_600x600/C2"
     transform_images_in_folder(input_folder, output_folder)
