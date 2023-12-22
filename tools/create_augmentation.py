@@ -22,7 +22,8 @@ def realizar_augmentacao(imagem, destino, nome_imagem):
         nome_aumento = "virada_" + nome_imagem
     else:
         # Rotate the image slightly
-        angulo = random.choice([random.randint(-60, -20), random.randint(20, 60)])
+        #angulo = random.choice([random.randint(-60, -20), random.randint(20, 60)])
+        angulo = random.choice([random.randint(-25, -10), random.randint(10, 25)])
         altura, largura = imagem.shape[:2]
         matriz_rotacao = cv2.getRotationMatrix2D((largura / 2, altura / 2), angulo, 1)
         imagem_aumentada = cv2.warpAffine(imagem, matriz_rotacao, (largura, altura))
@@ -47,7 +48,7 @@ def augment_images_in_folder(pasta_treino, percentual_aumento):
 
 if __name__ == "__main__":
     # Set the folder path for training images
-    pasta_treino = "/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_RB_NEW_CVAT_C1_C2C3_Cropped_600x600/train"
+    pasta_treino = "/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3/train"
 
     # Clear previously augmented images with "girada" or "virada" in the file name
     clear_aug(pasta_treino)

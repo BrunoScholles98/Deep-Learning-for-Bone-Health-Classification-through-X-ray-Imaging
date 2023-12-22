@@ -19,19 +19,21 @@ import tqdm
 
 import utils
 
+os.system('cls' if os.name == 'nt' else 'clear')
+
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Caracteristicas do Treinamento
-MODEL = 'efficientnet-b7'
+MODEL = 'efficientnet-b5'
 BATCH_SIZE = 4
-EPOCHS = 100
+EPOCHS = 200
 LOG_INTERVAL = 10
 PERS_RESIZE_NUM = 3
 REDUCELRONPLATEAU = True
 PERSONALIZED_RESIZE = True
 
 # Paths
-DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C2C3')
+DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3')
 TRAIN_NAME = utils.generate_training_name(MODEL, DATASET_PATH, BATCH_SIZE, EPOCHS)
 OUTPUT_PATH = Path('/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/results/' + TRAIN_NAME)
 MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '.pth')
@@ -44,23 +46,18 @@ NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH / 'train').iterdir()
 
 if PERSONALIZED_RESIZE == True:
     RESIZE = ((lambda img: (img.size[1] // PERS_RESIZE_NUM, img.size[0] // PERS_RESIZE_NUM))(Image.open(IMG_RESIZE_PATH)))
+    print(RESIZE)
 else:
-    if MODEL == 'efficientnet-b0':
-        RESIZE = (224, 224)
-    elif MODEL == 'efficientnet-b1':
-        RESIZE = (240, 240)
-    elif MODEL == 'efficientnet-b2':
-        RESIZE = (260, 260)
-    elif MODEL == 'efficientnet-b3':
-        RESIZE = (300, 300)
-    elif MODEL == 'efficientnet-b4':
-        RESIZE = (380, 380)
-    elif MODEL == 'efficientnet-b5':
-        RESIZE = (456, 456)
-    elif MODEL == 'efficientnet-b6':
-        RESIZE = (528, 528)
-    elif MODEL == 'efficientnet-b7':
-        RESIZE = (600, 600)
+    resize_mapping = {'efficientnet-b0': (224, 224),
+                    'efficientnet-b1': (240, 240),
+                    'efficientnet-b2': (260, 260),
+                    'efficientnet-b3': (300, 300),
+                    'efficientnet-b4': (380, 380),
+                    'efficientnet-b5': (456, 456),
+                    'efficientnet-b6': (528, 528),
+                    'efficientnet-b7': (600, 600)}
+    
+    RESIZE = resize_mapping.get(MODEL, None)
 
 writer = SummaryWriter(TENSORBOARD_LOG)
 
@@ -133,7 +130,6 @@ def train_by_one_epoch(model, criterion, optimizer, train_dl, all_steps_counter_
 
 
 def run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_dl, val_dl):
-    writer = SummaryWriter(TENSORBOARD_LOG)
     epoch_bar = tqdm.tqdm(range(EPOCHS), initial=0, total=EPOCHS)
     epoch_bar.set_description("Overall Progress")
     
@@ -152,7 +148,13 @@ def run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_dl, va
         writer.add_scalar('Validation/Epoch_Loss', mean_loss_validation, epoch)
         writer.add_scalar('Validation/Epoch_Accuracy', val_epoch_accuracy, epoch)
 
+        # Checkpoint a cada 10 epocas
+        if epoch % 10 == 0:
+            torch.save(model.state_dict(), MODEL_SAVING_PATH)
+        
         scheduler.step(mean_loss_train)
+        
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def test_model(model, test_loader):

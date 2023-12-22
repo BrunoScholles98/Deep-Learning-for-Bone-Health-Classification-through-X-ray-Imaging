@@ -40,9 +40,9 @@ def test_model(model, test_loader):
     print("Arquivo salvo com sucesso!")
 
 if __name__ == "__main__":
-    MODEL_PATH = '/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/results/AUG_RB_NEW_CVAT_C1_C3_Cropped_600x600_Batch8_100Ep/AUG_RB_NEW_CVAT_C1_C3_Cropped_600x600_Batch8_100Ep.pth'
+    MODEL_PATH = '/d01/scholles/gigasistemica/saved_models/old/efficientnet-b7_AUG_RB_CVAT_Train_C1_C2C3_Croped_600x600_Batch4_100Ep/efficientnet-b7_AUG_RB_CVAT_Train_Saudavel_DoenteGeral_Croped_600x600_Batch4_100Ep.pth'
     MODEL = 'efficientnet-b7'
-    DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_RB_NEW_CVAT_C1_C3_Cropped_600x600')
+    DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/roll_ball_only/RB_NEW_CVAT_C1_C2C3_Cropped_600x600_copy')
     BATCH_SIZE = 4
 
     if MODEL == 'efficientnet-b0':
