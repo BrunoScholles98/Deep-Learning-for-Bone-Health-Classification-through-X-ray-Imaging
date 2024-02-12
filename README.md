@@ -78,6 +78,43 @@ Below are two examples of the visualizations that will be available in the provi
 
 If you intend to utilize these scripts for alternative applications, adjust the code structure accordingly based on the provided logic. Should you encounter any difficulties, do not hesitate to reach out to me via the [Contact](#contact) section.
 
+### Fully Working Model
+
+This repository contains a fully functional script for diagnosing full panoramic radiographic images. The script includes automatic preprocessing steps for the image, applying the Rolling Ball algorithm to remove the background and standardize the input images. Additionally, the code downsizes the image and feeds it into the neural network, which returns a JSON with the diagnosis and the paths of the two output images - the Grad-CAM visualization images and the Grad-CAM overlay on the original image.
+
+To execute the script, it is necessary to have the trained model, available at the following [link](https://www.dropbox.com/scl/fo/03ng3uilv0vkd63zz9z5b/h?rlkey=dca4hj87xvcdr21atqi4fguxp&dl=0). Follow the steps below:
+
+1. Download the trained model from the provided link.
+2. Execute the script in the console using the following command:
+
+`$ python run_model.py path/of/the/model.pth`
+
+3. After `Loaded pretrained weights` appears on the console, insert a JSON containing the path of the image and the output path where the resulting images will be saved:
+
+```json
+{"img_path": "path/of/your/image.jpg","destination_path": "path/of/your/outputs"}
+```
+
+4. After execution, which may take a few minutes, you will receive the output result. If everything goes smoothly, 'ok' will be returned along with the diagnosis and the path of the two generated images, which will have the original image name plus the image type and the date + time when the script was executed:
+
+```json
+{"result": "ok", "diagnosis": "Healthy Patient or Patient with Osteoporosis", "saliency_img_path": "path/of/your/outputs/image_saliency_date&hour.png", "overlay_img_path": "path/of/your/outputs/image_overlay_date&hour.png"}
+```
+
+Below are two examples of output, obtained from a panoramic radiograph of the author himself:
+
+**Output Images (Grad-CAM and Overlay respectively):**
+
+![Grad-CAM and Overlay](https://i.postimg.cc/fL2XWzPk/Bruno-Scholles-Radiography-saliency-overlay-20240212162822.png)
+
+**Output JSON:**
+
+```json
+{"result": "ok", "diagnosis": "Healthy Patient", "saliency_img_path": "/d01/scholles/gigasistemica/gigacandanga_exec/outputs/BrunoScholles-Radiography_saliency_20240212162822.png", "overlay_img_path": "/d01/scholles/gigasistemica/gigacandanga_exec/outputs/BrunoScholles-Radiography_overlay_20240212162822.png"}
+```
+
+Should you encounter any difficulties, do not hesitate to reach out to me via the [Contact](#contact) section.
+
 <a name="contact"></a>
 ## Contact
 
