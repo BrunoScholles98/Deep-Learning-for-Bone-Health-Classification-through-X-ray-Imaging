@@ -98,7 +98,7 @@ To execute the script, it is necessary to have the trained model, available at t
 4. After execution, which may take a few minutes, you will receive the output result. If everything goes smoothly, 'ok' will be returned along with the diagnosis and the path of the two generated images, which will have the original image name plus the image type and the date + time when the script was executed:
 
 ```json
-{"result": "ok", "diagnosis": "Healthy Patient or Patient with Osteoporosis", "saliency_img_path": "path/of/your/outputs/image_saliency_date&hour.png", "overlay_img_path": "path/of/your/outputs/image_overlay_date&hour.png"}
+{"result": "ok or fail", "diagnosis": "Healthy Patient or Patient with Osteoporosis", "saliency_img_path": "path/of/your/outputs/image_saliency_date&hour.png", "overlay_img_path": "path/of/your/outputs/image_overlay_date&hour.png"}
 ```
 
 Below are two examples of output, obtained from a panoramic radiograph of the author himself:
