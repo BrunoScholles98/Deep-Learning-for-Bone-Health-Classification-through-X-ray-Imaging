@@ -11,9 +11,10 @@
 
 <a name="desc"></a>
 ## 1. Project Description and Status
-This project is part of GigaSistêmica, an initiative in association with GigaCandanga, aiming to create a diagnostic and predictive system for systemic diseases based on dental radiographs. My main focus within the project is to develop a neural network-based system capable of classifying patients' bone health and identifying osteoporosis, all through panoramic radiographic images. The goal is to streamline the diagnosis and treatment process for patients, particularly within the Brazilian public health system.
 
-Currently, this repository is not complete as the research is still under development. Thus, here are the codes used for the training of EfficientNet and the network's tests, as well as the tools used for data pre-processing; however, they are not yet properly organized. Consequently, in the future, there will be an overall improvement in the organization of the codes and files.
+This project is a key component of GigaSistêmica, a collaborative initiative with GigaCandanga, dedicated to advancing diagnostic and predictive capabilities for systemic diseases using dental radiographs. My primary role in this endeavor is to pioneer the development of a neural network-driven system tailored to classify patients' bone health and detect osteoporosis, leveraging panoramic radiographic images. The ultimate aim is to expedite the diagnostic and treatment pathways for patients, with a particular focus on enhancing efficiency within the Brazilian public health system.
+
+While the research is still ongoing, the current repository contains essential elements used in training EfficientNet and conducting network evaluations. Additionally, it includes tools for data pre-processing and Grad-CAM Visualization. However, the organization of these resources is a work in progress. Efforts will be made in the future to enhance the overall structure and coherence of the codebase and associated files. It is noteworthy that an article detailing the findings of this research is currently being prepared for submission to a scientific journal.
 
 <a name="lic"></a>
 ## 2. License
@@ -33,7 +34,7 @@ To facilitate the installation of the required libraries, a `.yml` file has been
 
 ### Machine Specifications
 
-It is recommended to have a machine with suitable configurations in terms of GPU (VRAM), RAM, and CPU for efficient execution of the scripts. Below are the specifications of the machine used in the project development:
+It is recommended to use a machine with suitable configurations in terms of GPU (VRAM), RAM, and CPU for efficient execution of the scripts. Down below are the specifications of the machine used in the project development:
 
 | Component   | Specification            |
 |-------------|--------------------------|
