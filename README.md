@@ -52,7 +52,7 @@ This repository includes two training scripts: one for full images, without a de
 
 - Root Folder
   - Subfolder of Class 1 (Healthy Patients)
-    - All files of panoramic radiographs of Class 0
+    - All files of panoramic radiographs of Class 1
   - Subfolder of Class 3 (Patients with Osteoporosis)
     - All files of panoramic radiographs of Class 3
 
