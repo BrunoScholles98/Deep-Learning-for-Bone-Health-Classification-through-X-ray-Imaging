@@ -42,3 +42,20 @@ It is recommended to have a machine with suitable configurations in terms of GPU
 | GPU         | GeForce RTX 3090         |
 | RAM         | 128GB                    |
 | CUDA Toolkit| 11.6                     |
+
+<a name="inst"></a>
+## Instructions
+
+### Training
+
+This repository includes two training scripts: one for full images, without a defined format, which simply downscales the image by 3 times, and another for square images, which in this case are square crops of the original image. Therefore, before executing any of the training scripts, it is necessary to organize the folder containing the dataset with the images to be used. It is important to note that it is not necessary to separate the folders into training, testing, and validation sets, as the training script uses K-Fold Cross Validation, automatically separating the training and testing sets and also performing data augmentation on every training fold.
+
+- Root Folder
+  - Subfolder of Class 1 (Healthy Patients)
+    - All files of panoramic radiographs of Class 0
+  - Subfolder of Class 3 (Patients with Osteoporosis)
+    - All files of panoramic radiographs of Class 3
+
+With this, we have the files `train-cross.py` and `train-cross-full-img.py`, both working on the same logic. Before executing them, remember to update the path of the root folder of your dataset and also the path of the results folder within the script code. The name of the generated folder is automatically defined for the evaluation of the results of cross-validation training, being composed of the name of the used EfficientNet, the name of the dataset, and some training configurations.
+
+If you intend to utilize these scripts for alternative applications, adjust the subfolder structure accordingly based on the provided logic. Should you encounter any difficulties, do not hesitate to reach out to me via the [Contact](#contact) section.
