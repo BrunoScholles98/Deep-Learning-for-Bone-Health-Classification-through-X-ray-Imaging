@@ -76,7 +76,7 @@ Below are two examples of the visualizations that will be available in the provi
 
 ![](https://i.postimg.cc/2S527FxR/cropped.png)
 
-If you intend to utilize these scripts for alternative applications, adjust the subfolder structure accordingly based on the provided logic. Should you encounter any difficulties, do not hesitate to reach out to me via the [Contact](#contact) section.
+If you intend to utilize these scripts for alternative applications, adjust the code structure accordingly based on the provided logic. Should you encounter any difficulties, do not hesitate to reach out to me via the [Contact](#contact) section.
 
 <a name="contact"></a>
 ## Contact
