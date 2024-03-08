@@ -1,11 +1,10 @@
 ## Contents
 
 1. [Description and Status](#desc)
-2. [License](#lic)
-3. [Requirements](#req)
-4. [Instructions](#inst)
-6. [Contact](#contact)
-7. [Thanks](#thanks)
+2. [Requirements](#req)
+3. [Instructions](#inst)
+4. [Contact](#contact)
+5. [Thanks](#thanks)
 
 # EfficientNet for Bone Health Classification through X-ray Imaging
 
@@ -14,15 +13,10 @@
 
 This project is a key component of GigaSistêmica, a collaborative initiative with GigaCandanga, dedicated to advancing diagnostic and predictive capabilities for systemic diseases using dental radiographs. My primary role in this endeavor is to pioneer the development of a neural network-driven system tailored to classify patients' bone health and detect osteoporosis, leveraging panoramic radiographic images. The ultimate aim is to expedite the diagnostic and treatment pathways for patients, with a particular focus on enhancing efficiency within the Brazilian public health system.
 
-While the research is still ongoing, the current repository contains essential elements used in training EfficientNet and conducting network evaluations. Additionally, it includes tools for data pre-processing and Grad-CAM Visualization. However, the organization of these resources is a work in progress. Efforts will be made in the future to enhance the overall structure and coherence of the codebase and associated files. It is noteworthy that an article detailing the findings of this research is currently being prepared for submission to a scientific journal.
-
-<a name="lic"></a>
-## 2. License
-
-Still to be defined...
+While the research is still ongoing, the current repository contains essential elements used in training EfficientNet and conducting network evaluations. Additionally, it includes tools for data pre-processing and Grad-CAM Visualization. However, the organization of these resources is a work in progress. Efforts will be made in the future to enhance the overall structure and coherence of the codebase and associated files. It is worth noting that an article detailing the findings of this research is currently awaiting revision in the journal _Artificial Intelligence in Medicine_.
 
 <a name="req"></a>
-## 3. Requirements
+## 2. Requirements
 
 To run the Python scripts, it is crucial to have all the libraries used in the project development installed on your machine. Given the considerable number of libraries involved, it is highly recommended to use [Anaconda](https://www.anaconda.com/download) and create a dedicated environment for executing the provided codes.
 
@@ -44,7 +38,7 @@ It is recommended to use a machine with suitable configurations in terms of GPU 
 | CUDA Toolkit| 11.6                     |
 
 <a name="inst"></a>
-## 4. Instructions
+## 3. Instructions
 
 ### Training
 
@@ -116,11 +110,11 @@ Below are two examples of output, obtained from a panoramic radiograph of the au
 Should you encounter any difficulties, do not hesitate to reach out to me via the [Contact](#contact) section.
 
 <a name="contact"></a>
-## Contact
+## 4. Contact
 
 Please feel free to reach out with any comments, questions, reports, or suggestions via email at brunoscholles98@gmail.com. Additionally, you can contact me via WhatsApp at +55 61 992598713.
 
 <a name="thanks"></a>
-## Thanks
+## 5. Thanks
 
 Special thanks to my advisors [Mylene C. Q. Farias](http://www.ene.unb.br/mylene/), [André Ferreira Leite](http://lattes.cnpq.br/7275660736054053), and [Nilce Santos de Melo](http://lattes.cnpq.br/4611919012909264). Also, a special thanks to my colleague [Raiza Querrer Peixoto](https://www.escavador.com/sobre/5950023/raiza-querrer-soares).
