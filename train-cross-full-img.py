@@ -28,7 +28,7 @@ os.system('cls' if os.name == 'nt' else 'clear')
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Caracteristicas do Treinamento
-MODEL = 'efficientnet-b7'
+MODEL = 'efficientnet-b1'
 BATCH_SIZE = 4
 EPOCHS = 100
 LOG_INTERVAL = 10

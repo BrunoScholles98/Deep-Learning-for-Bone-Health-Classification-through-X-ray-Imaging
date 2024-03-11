@@ -28,15 +28,15 @@ os.system('cls' if os.name == 'nt' else 'clear')
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Caracteristicas do Treinamento
-MODEL = 'efficientnet-b0'
-BATCH_SIZE = 32
+MODEL = 'efficientnet-b5'
+BATCH_SIZE = 8
 EPOCHS = 100
 LOG_INTERVAL = 5
 PERS_RESIZE_NUM = 3
 REDUCELRONPLATEAU = True
 PERSONALIZED_RESIZE = False
 BETAS_LR = (0.9, 0.999)  # Valores padrão, mas você pode ajustá-los se desejar
-NFOLDS = 3
+NFOLDS = 5
 
 # Paths
 DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/KFOLD_DATASETS/UNITED_RB_CVAT_Cropped_600x600_C1_C3')
