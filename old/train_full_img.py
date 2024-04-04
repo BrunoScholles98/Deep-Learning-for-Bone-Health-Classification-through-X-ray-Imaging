@@ -2,24 +2,20 @@ import os
 from pathlib import Path
 
 import torch
+import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchmetrics import Accuracy
-from torch.utils.data import Dataset
-
+from torchvision.models import efficientnet_b7
 from efficientnet_pytorch import EfficientNet
 
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 
 from sklearn.metrics import classification_report
-from sklearn.model_selection import KFold
-from sklearn.metrics import roc_auc_score
-import random
 from PIL import Image
 import tqdm
-import json
 
 import utils
 
@@ -28,32 +24,28 @@ os.system('cls' if os.name == 'nt' else 'clear')
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Caracteristicas do Treinamento
-MODEL = 'efficientnet-b5'
-BATCH_SIZE = 8
-EPOCHS = 100
-LOG_INTERVAL = 5
+MODEL = 'efficientnet-b7'
+BATCH_SIZE = 4
+EPOCHS = 200
+LOG_INTERVAL = 10
 PERS_RESIZE_NUM = 3
 REDUCELRONPLATEAU = True
-PERSONALIZED_RESIZE = False
-BETAS_LR = (0.9, 0.999)  # Valores padrão, mas você pode ajustá-los se desejar
-NFOLDS = 5
+PERSONALIZED_RESIZE = True
 
 # Paths
-DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/KFOLD_DATASETS/UNITED_RB_CVAT_Cropped_600x600_C1_C3')
+DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3')
 TRAIN_NAME = utils.generate_training_name(MODEL, DATASET_PATH, BATCH_SIZE, EPOCHS)
-OUTPUT_PATH = Path('/d01/scholles/gigasistemica/saved_models/K-Fold-Paper/' + TRAIN_NAME)
-MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '_test.pth')
+OUTPUT_PATH = Path('/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/results/' + TRAIN_NAME)
+MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '.pth')
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
-TENSORBOARD_LOG = OUTPUT_PATH / 'log_kfold_'
+TENSORBOARD_LOG = OUTPUT_PATH / 'log'
 STATS_PATH = OUTPUT_PATH / 'stats.txt'
-IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/dataset/CVAT_2/train/Osteoporose_Grave/OPHUB2016-26.jpg'
+IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3/test/C3/OPHUB2017-0046.jpg'
 
-# Caracteristicas do Treinamento
-NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH).iterdir() if subfolder.is_dir()])
+NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH / 'train').iterdir() if subfolder.is_dir()])
 
 if PERSONALIZED_RESIZE == True:
-    #RESIZE = ((lambda img: (img.size[1] // PERS_RESIZE_NUM, img.size[0] // PERS_RESIZE_NUM))(Image.open(IMG_RESIZE_PATH)))
-    RESIZE = (449, 954)
+    RESIZE = ((lambda img: (img.size[1] // PERS_RESIZE_NUM, img.size[0] // PERS_RESIZE_NUM))(Image.open(IMG_RESIZE_PATH)))
     print(RESIZE)
 else:
     resize_mapping = {'efficientnet-b0': (224, 224),
@@ -67,27 +59,7 @@ else:
     
     RESIZE = resize_mapping.get(MODEL, None)
 
-print(RESIZE)
-
-class CustomDataset(Dataset):
-    def __init__(self, data_list, transform=None):
-        self.data_list = data_list
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.data_list)
-
-    def __getitem__(self, index):
-        img, label = self.data_list[index]
-
-        # Aplica transformações, se fornecidas
-        if self.transform:
-            img = self.transform(img)
-
-        # Converte a label para um tensor, se necessário
-        label = torch.tensor(label)
-
-        return img, label
+writer = SummaryWriter(TENSORBOARD_LOG)
 
 def validate_model(model, criterion, val_dl, all_steps_counter_val, writer):
     accuracy_fnc = Accuracy().to(DEVICE)
@@ -95,7 +67,7 @@ def validate_model(model, criterion, val_dl, all_steps_counter_val, writer):
     val_epoch_accuracy = 0
 
     validation_bar = tqdm.tqdm(enumerate(val_dl), total=len(val_dl))
-    validation_bar.set_description('Fold ' + str(actual_fold) + " - Validation Progress (Epoch)")    
+    validation_bar.set_description("Validation Progress (Epoch)")    
 
     with torch.no_grad():
         for validation_step, inp in validation_bar:
@@ -135,7 +107,7 @@ def train_by_one_epoch(model, criterion, optimizer, train_dl, all_steps_counter_
     train_epoch_accuracy = 0
 
     training_bar = tqdm.tqdm(enumerate(train_dl), total=len(train_dl))
-    training_bar.set_description('Fold ' + str(actual_fold) + " - Training Progress (Epoch)")
+    training_bar.set_description("Training Progress (Epoch)")
 
     for step_train, inp in training_bar:
         inputs, labels = inp
@@ -157,9 +129,10 @@ def train_by_one_epoch(model, criterion, optimizer, train_dl, all_steps_counter_
     return all_steps_counter_train, mean_loss_train, train_epoch_accuracy
 
 
-def run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_dl, val_dl, writer, actual_fold_path):
+def run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_dl, val_dl):
+    writer = SummaryWriter(TENSORBOARD_LOG)
     epoch_bar = tqdm.tqdm(range(EPOCHS), initial=0, total=EPOCHS)
-    epoch_bar.set_description('Fold ' + str(actual_fold) + " - Overall Progress")
+    epoch_bar.set_description("Overall Progress")
     
     all_steps_counter_train = 0
     all_steps_counter_val = 0
@@ -178,7 +151,7 @@ def run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_dl, va
 
         # Checkpoint a cada 10 epocas
         if epoch % 10 == 0:
-            torch.save(model.state_dict(), actual_fold_path.joinpath(TRAIN_NAME + '.pth'))
+            torch.save(model.state_dict(), MODEL_SAVING_PATH)
         
         scheduler.step(mean_loss_train)
         
@@ -198,25 +171,20 @@ def test_model(model, test_loader):
             
             y_true += labels.cpu().numpy().tolist()
             y_pred += predicted.cpu().numpy().tolist()
-            
-    return y_true, y_pred
-
-def calculate_auc_and_specificity(kfold_y_true, kfold_y_pred):
-    # Calculate AUC Score
-    auc_score = roc_auc_score(kfold_y_true, kfold_y_pred)
-
-    # Calculate Specificity
-    # Specificity = TN / (TN + FP)
-    true_negatives = sum((1 for true, pred in zip(kfold_y_true, kfold_y_pred) if true == 0 and pred == 0))
-    false_positives = sum((1 for true, pred in zip(kfold_y_true, kfold_y_pred) if true == 0 and pred == 1))
-    specificity = true_negatives / (true_negatives + false_positives)
-
-    return auc_score, specificity
-
-def main():
-    kfold_y_true = []
-    kfold_y_pred = []
     
+    report = classification_report(y_true, y_pred, digits=4)
+    print(report)
+
+    # Abra um arquivo de texto para escrita
+    with open(STATS_PATH, 'w') as arquivo:
+        # Escreva a saída do relatório no arquivo
+        arquivo.write(report)
+
+    # Confirme que o arquivo foi salvo
+    print("Arquivo salvo com sucesso!")
+    
+
+def main():   
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
    
@@ -225,81 +193,42 @@ def main():
         transforms.ToTensor(), # converte as imagens para tensores
         normalize
         #transforms.Normalize(equilized_values())
-    ])    
+    ])
 
     print('Iniciada a leitura dos dados...')
-    # Cria o conjunto de dados
-    full_dataset = ImageFolder(DATASET_PATH, transform=None)
+    # Cria o conjunto de dados de treinamento
+    train_dataset = ImageFolder(DATASET_PATH / "train", transform=transform)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
-    kfold = KFold(n_splits=NFOLDS, shuffle=True)
+    # Cria o conjunto de dados de validação
+    val_dataset = ImageFolder(DATASET_PATH / "val", transform=transform)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
+
+    # Cria o conjunto de dados de teste
+    test_dataset = ImageFolder(DATASET_PATH / "test", transform=transform)
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
+
+    #model = efficientnet_b7(pretrained=True)
+    model = EfficientNet.from_pretrained(MODEL)
+    model.to(DEVICE)
+
+    # Definir a função de perda e o otimizador
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    if REDUCELRONPLATEAU == True:
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor = 0.1, patience=5)
+    else:
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor = 0.1, patience=10000)    
+
+    # Roda o treinamento e validação
+    run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_loader, val_loader) 
     
-    for fold, (train_ids, test_ids) in enumerate(kfold.split(full_dataset)):        
-        
-        global actual_fold
-        actual_fold = fold + 1
-        writer = SummaryWriter(TENSORBOARD_LOG.with_name(f"log_kfold_{actual_fold}"))
-        actual_fold_path =  OUTPUT_PATH / f"log_kfold_{actual_fold}"
-         
-        #model = efficientnet_b7(pretrained=True)
-        model = EfficientNet.from_pretrained(MODEL)
-        model.to(DEVICE)
-
-        # Definir a função de perda e o otimizador
-        criterion = torch.nn.CrossEntropyLoss()
-        
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=BETAS_LR)
-        if REDUCELRONPLATEAU == True:
-            scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor = 0.1, patience=5)
-        else:
-            scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor = 0.1, patience=1000000)
-
-        # Sample elements randomly from a given list of ids, no replacement.
-        train_data = [full_dataset[i] for i in train_ids]
-        test_data = [full_dataset[i] for i in test_ids]
-        train_data = utils.apply_augmentation(train_data)
-        
-        random.shuffle(train_data)
-        random.shuffle(test_data)
-        
-        selected_train_subset = CustomDataset(train_data, transform=transform)
-        selected_test_val_subset= CustomDataset(test_data, transform=transform)
-        
-        train_loader = DataLoader(selected_train_subset, batch_size=BATCH_SIZE)
-        val_test_loader = DataLoader(selected_test_val_subset, batch_size=BATCH_SIZE)
-        
-        # Roda o treinamento e validação
-        run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_loader, val_test_loader, writer, actual_fold_path)
-        
-        y_true, y_pred = test_model(model, val_test_loader)
-        
-        kfold_y_true = kfold_y_true + y_true
-        kfold_y_pred = kfold_y_pred + y_pred
-    
+    print('\n\nClassification Report')
+    test_model(model, test_loader)
     print('\n\n')
-    report = classification_report(kfold_y_true, kfold_y_pred, digits=4)
-    print(report)
-    print('\n\n')
-    
-    auc_score, specificity = calculate_auc_and_specificity(kfold_y_true, kfold_y_pred)    
-    report += f"\n\nAUC Score: {auc_score}\nSpecificity: {specificity}"
 
-    # Abra um arquivo de texto para escrita    
-    with open(STATS_PATH, 'w') as arquivo:
-        # Escreva a saída do relatório no arquivo
-        arquivo.write(report)
-
-    torch.save(model.state_dict(), actual_fold_path.joinpath(TRAIN_NAME + '.pth'))
-    print("Arquivo salvo com sucesso!")
-    
-    GT_vs_Predictions = {
-        "kfold_y_true": kfold_y_true,
-        "kfold_y_pred": kfold_y_pred
-    }
-    
-    GT_vs_Predictions_json_path = OUTPUT_PATH / 'GT_vs_Predictions.json'    
-    # Salvar os dados em um arquivo JSON
-    with open(GT_vs_Predictions_json_path, 'w') as f:
-        json.dump(GT_vs_Predictions, f)
+    # Salvar o modelo treinado    
+    torch.save(model.state_dict(), MODEL_SAVING_PATH)
 
 if __name__ == '__main__':
-    main()
+    main()    
