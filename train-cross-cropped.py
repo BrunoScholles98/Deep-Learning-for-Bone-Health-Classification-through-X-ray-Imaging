@@ -130,7 +130,7 @@ def train_one_step(model, optimizer, criterion, inputs, labels):
 
 
 def train_by_one_epoch(model, criterion, optimizer, train_dl, all_steps_counter_train, writer):
-    accuracy_fnc = Accuracy().to(DEVICE)
+    accuracy_fnc = Accuracy(task='BINARY').to(DEVICE)
     mean_loss_train = 0
     train_epoch_accuracy = 0
 
