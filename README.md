@@ -6,7 +6,7 @@
 4. [Contact](#contact)
 5. [Thanks](#thanks)
 
-# EfficientNet for Bone Health Classification through X-ray Imaging
+# Deep Learning for Bone Health Classification through X-ray Imaging
 
 <a name="desc"></a>
 ## 1. Project Description and Status
