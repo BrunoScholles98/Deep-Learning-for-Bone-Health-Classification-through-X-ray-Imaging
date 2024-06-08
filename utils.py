@@ -47,52 +47,30 @@ def generate_training_name(model, dataset_path, batch_size, epochs):
 
 
 def train_resize(model_name, personalized_resize):
-    if personalized_resize == True:
-        resize = (449, 954)    
-    else:
-        resize_mapping = {'efficientnet-b0': (224, 224),
-                        'efficientnet-b1': (240, 240),
-                        'efficientnet-b2': (260, 260),
-                        'efficientnet-b3': (300, 300),
-                        'efficientnet-b4': (380, 380),
-                        'efficientnet-b5': (456, 456),
-                        'efficientnet-b6': (528, 528),
-                        'efficientnet-b7': (600, 600),
-                        'fastvit_t8' : (256, 256),
-                        'fastvit_t12' : (256, 256),
-                        'fastvit_s12' : (256, 256),
-                        'fastvit_sa12' : (256, 256),
-                        'fastvit_sa24' : (256, 256),
-                        'fastvit_sa36' : (256, 256),
-                        'fastvit_ma36' : (256, 256),
-                        'swinv2_b': (600,600)}    
-        
-        resize = resize_mapping.get(model_name, None)
+    if personalized_resize:
+        return (449, 954)
     
-    return resize
+    resize_mapping = {
+        'efficientnet-b0': (224, 224), 'efficientnet-b1': (240, 240), 'efficientnet-b2': (260, 260),
+        'efficientnet-b3': (300, 300), 'efficientnet-b4': (380, 380), 'efficientnet-b5': (456, 456),
+        'efficientnet-b6': (528, 528), 'efficientnet-b7': (600, 600), 'fastvit_t8': (256, 256),
+        'fastvit_t12': (256, 256), 'fastvit_s12': (256, 256), 'fastvit_sa12': (256, 256),
+        'fastvit_sa24': (256, 256), 'fastvit_sa36': (256, 256), 'fastvit_ma36': (256, 256),
+        'swinv2_b': (600, 600)
+    }
+
+    return resize_mapping.get(model_name, None)
    
 
 def load_model(model_name, n_classes):
     # Load the appropriate model based on the model name
     if "efficientnet-" in model_name:
         model = EfficientNet.from_pretrained(model_name)
-    elif "fastvit_t8" in model_name:
-        model = create_model('fastvit_t8.apple_in1k', num_classes=n_classes)
-    elif "fastvit_t12" in model_name:
-        model = create_model('fastvit_t12.apple_in1k', num_classes=n_classes)
-    elif "fastvit_s12" in model_name:
-        model = create_model('fastvit_s12.apple_in1k', num_classes=n_classes)
-    elif "fastvit_sa12" in model_name:
-        model = create_model('fastvit_sa12.apple_in1k', num_classes=n_classes)
-    elif "fastvit_sa24" in model_name:
-        model = create_model('fastvit_sa24.apple_in1k', num_classes=n_classes)
-    elif "fastvit_sa36" in model_name:
-        model = create_model('fastvit_sa36.apple_in1k', num_classes=n_classes)
-    elif "fastvit_ma36" in model_name:
-        model = create_model('fastvit_ma36.apple_in1k', num_classes=n_classes)
+    elif "fastvit" in model_name:
+        model = create_model(model_name+'.apple_in1k', num_classes=n_classes)
     elif "swinv2" in model_name: # Not working
         model = create_model('swinv2_base_window12to24_192to384.ms_in22k_ft_in1k', num_classes=n_classes, pretrained=False)
     else:
-        print("ERROR: Model does not exist or is not implemented. Please check if you have entered the model name correctly.")
-        exit()
+        raise ValueError("ERROR: Model does not exist or is not implemented. Please check if you have entered the model name correctly.")
+    
     return model
