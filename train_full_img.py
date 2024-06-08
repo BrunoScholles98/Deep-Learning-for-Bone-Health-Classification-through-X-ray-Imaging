@@ -2,21 +2,20 @@ import os
 from pathlib import Path
 
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchmetrics import Accuracy
-from torchvision.models import efficientnet_b7
-from efficientnet_pytorch import EfficientNet
-from timm.models import create_model
-
+from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 
 from sklearn.metrics import classification_report
-from PIL import Image
+from sklearn.model_selection import KFold
+from sklearn.metrics import roc_auc_score
+import random
 import tqdm
+import json
 
 import utils
 
@@ -46,22 +45,8 @@ IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG
 
 NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH / 'train').iterdir() if subfolder.is_dir()])
 
-if PERSONALIZED_RESIZE == True:
-    RESIZE = (449, 954)
-    print(RESIZE)
-else:
-    resize_mapping = {'efficientnet-b0': (224, 224),
-                    'efficientnet-b1': (240, 240),
-                    'efficientnet-b2': (260, 260),
-                    'efficientnet-b3': (300, 300),
-                    'efficientnet-b4': (380, 380),
-                    'efficientnet-b5': (456, 456),
-                    'efficientnet-b6': (528, 528),
-                    'efficientnet-b7': (600, 600),
-                    'fastvit_t8': (256, 256),
-                    'swinv2_b': (600,600)}
-    
-    RESIZE = resize_mapping.get(MODEL, None)
+RESIZE = utils.train_resize(MODEL, PERSONALIZED_RESIZE)
+print("Resize:",RESIZE)
 
 writer = SummaryWriter(TENSORBOARD_LOG)
 
@@ -212,7 +197,7 @@ def main():
     test_dataset = ImageFolder(DATASET_PATH / "test", transform=transform)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
-    model = create_model('swinv2_base_window12_192_22k', num_classes=2, pretrained=False)
+    model = utils.load_model(MODEL, NUM_CLASSES)
     model.to(DEVICE)
 
     # Definir a função de perda e o otimizador

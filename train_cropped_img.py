@@ -2,62 +2,53 @@ import os
 from pathlib import Path
 
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchmetrics import Accuracy
-from torchvision.models import efficientnet_b7
-from efficientnet_pytorch import EfficientNet
-
+from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 
 from sklearn.metrics import classification_report
-from PIL import Image
+from sklearn.model_selection import KFold
+from sklearn.metrics import roc_auc_score
+import random
 import tqdm
+import json
 
 import utils
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(DEVICE)
 
 # Caracteristicas do Treinamento
-MODEL = 'efficientnet-b7'
-BATCH_SIZE = 4
-EPOCHS = 200
-LOG_INTERVAL = 10
+MODEL = 'swinv2_b'
+BATCH_SIZE = 8
+EPOCHS = 100
+LOG_INTERVAL = 5
 PERS_RESIZE_NUM = 3
 REDUCELRONPLATEAU = True
-PERSONALIZED_RESIZE = True
+PERSONALIZED_RESIZE = False
+BETAS_LR = (0.9, 0.999)  # Valores padrão, mas você pode ajustá-los se desejar
 
 # Paths
-DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3')
+DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_RB_NEW_CVAT_C1_C3_Cropped_600x600')
 TRAIN_NAME = utils.generate_training_name(MODEL, DATASET_PATH, BATCH_SIZE, EPOCHS)
-OUTPUT_PATH = Path('/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/results/' + TRAIN_NAME)
-MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '.pth')
+OUTPUT_PATH = Path('/d01/scholles/gigasistemica/saved_models/Cropped/' + TRAIN_NAME)
+MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '_test.pth')
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 TENSORBOARD_LOG = OUTPUT_PATH / 'log'
 STATS_PATH = OUTPUT_PATH / 'stats.txt'
-IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3/test/C3/OPHUB2017-0046.jpg'
+IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/gigasistemica_sandbox_scholles/dataset/CVAT_2/train/Osteoporose_Grave/OPHUB2016-26.jpg'
 
+# Caracteristicas do Treinamento
 NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH / 'train').iterdir() if subfolder.is_dir()])
 
-if PERSONALIZED_RESIZE == True:
-    RESIZE = ((lambda img: (img.size[1] // PERS_RESIZE_NUM, img.size[0] // PERS_RESIZE_NUM))(Image.open(IMG_RESIZE_PATH)))
-    print(RESIZE)
-else:
-    resize_mapping = {'efficientnet-b0': (224, 224),
-                    'efficientnet-b1': (240, 240),
-                    'efficientnet-b2': (260, 260),
-                    'efficientnet-b3': (300, 300),
-                    'efficientnet-b4': (380, 380),
-                    'efficientnet-b5': (456, 456),
-                    'efficientnet-b6': (528, 528),
-                    'efficientnet-b7': (600, 600)}
-    
-    RESIZE = resize_mapping.get(MODEL, None)
+RESIZE = utils.train_resize(MODEL, PERSONALIZED_RESIZE)
+print("Resize:",RESIZE)
 
 writer = SummaryWriter(TENSORBOARD_LOG)
 
@@ -102,7 +93,7 @@ def train_one_step(model, optimizer, criterion, inputs, labels):
 
 
 def train_by_one_epoch(model, criterion, optimizer, train_dl, all_steps_counter_train, writer):
-    accuracy_fnc = Accuracy().to(DEVICE)
+    accuracy_fnc = Accuracy(task='BINARY').to(DEVICE)
     mean_loss_train = 0
     train_epoch_accuracy = 0
 
@@ -208,13 +199,13 @@ def main():
     test_dataset = ImageFolder(DATASET_PATH / "test", transform=transform)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
-    #model = efficientnet_b7(pretrained=True)
-    model = EfficientNet.from_pretrained(MODEL)
+    model = utils.load_model(MODEL, NUM_CLASSES)
     model.to(DEVICE)
 
     # Definir a função de perda e o otimizador
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, betas=BETAS_LR)
     if REDUCELRONPLATEAU == True:
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor = 0.1, patience=5)
     else:

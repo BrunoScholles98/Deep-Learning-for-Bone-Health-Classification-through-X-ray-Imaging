@@ -7,9 +7,6 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchmetrics import Accuracy
 from torch.utils.data import Dataset
-
-from efficientnet_pytorch import EfficientNet
-
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 
@@ -17,7 +14,6 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import KFold
 from sklearn.metrics import roc_auc_score
 import random
-from PIL import Image
 import tqdm
 import json
 
@@ -50,21 +46,8 @@ IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG
 
 NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH).iterdir() if subfolder.is_dir()])
 
-if PERSONALIZED_RESIZE == True:
-    #RESIZE = ((lambda img: (img.size[1] // PERS_RESIZE_NUM, img.size[0] // PERS_RESIZE_NUM))(Image.open(IMG_RESIZE_PATH)))
-    RESIZE = (449, 954)
-    print(RESIZE)
-else:
-    resize_mapping = {'efficientnet-b0': (224, 224),
-                    'efficientnet-b1': (240, 240),
-                    'efficientnet-b2': (260, 260),
-                    'efficientnet-b3': (300, 300),
-                    'efficientnet-b4': (380, 380),
-                    'efficientnet-b5': (456, 456),
-                    'efficientnet-b6': (528, 528),
-                    'efficientnet-b7': (600, 600)}
-    
-    RESIZE = resize_mapping.get(MODEL, None)
+RESIZE = utils.train_resize(MODEL, PERSONALIZED_RESIZE)
+print("Resize:",RESIZE)
 
 class CustomDataset(Dataset):
     def __init__(self, data_list, transform=None):
@@ -237,8 +220,7 @@ def main():
         writer = SummaryWriter(TENSORBOARD_LOG.with_name(f"log_kfold_{actual_fold}"))    
         actual_fold_path =  OUTPUT_PATH / f"log_kfold_{actual_fold}"
          
-        #model = efficientnet_b7(pretrained=True)
-        model = EfficientNet.from_pretrained(MODEL)
+        model = utils.load_model(MODEL, NUM_CLASSES)
         model.to(DEVICE)
 
         # Definir a função de perda e o otimizador
