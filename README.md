@@ -99,7 +99,7 @@ Below are two examples of output, obtained from a panoramic radiograph of the au
 
 **Output Images (Grad-CAM and Overlay respectively):**
 
-![Grad-CAM and Overlay](https://i.postimg.cc/fL2XWzPk/Bruno-Scholles-Radiography-saliency-overlay-20240212162822.png)
+![Grad-CAM and Overlay](https://i.postimg.cc/G2JKkyGf/Bruno-Scholles-Radiography-saliency-overlay-20240212162822.png)
 
 **Output JSON:**
 
