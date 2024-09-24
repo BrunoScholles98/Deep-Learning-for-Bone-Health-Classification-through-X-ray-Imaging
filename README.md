@@ -66,9 +66,9 @@ The codes operate for networks trained with both complete images and those train
 
 Below are two examples of the visualizations that will be available in the provided codes: the first one for complete radiographs and the second one for radiograph crops.
 
-![](https://i.postimg.cc/J7yzFGRf/fullimg.png)
+![](https://i.postimg.cc/bJVrQwKB/fullimg.png)
 
-![](https://i.postimg.cc/2S527FxR/cropped.png)
+![](https://i.postimg.cc/63q55NyL/cropped.png)
 
 If you intend to utilize these scripts for alternative applications, adjust the code structure accordingly based on the provided logic. Should you encounter any difficulties, do not hesitate to reach out to me via the [Contact](#contact) section.
 
