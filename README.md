@@ -66,9 +66,9 @@ The codes operate for networks trained with both complete images and those train
 
 Below are two examples of the visualizations that will be available in the provided codes: the first one for complete radiographs and the second one for radiograph crops.
 
-![](https://i.postimg.cc/bJVrQwKB/fullimg.png)
+![](https://i.ibb.co/6PKDKRz/fullimg.png)
 
-![](https://i.postimg.cc/63q55NyL/cropped.png)
+![](https://i.ibb.co/Vt6W4XJ/cropped.png)
 
 If you intend to utilize these scripts for alternative applications, adjust the code structure accordingly based on the provided logic. Should you encounter any difficulties, do not hesitate to reach out to me via the [Contact](#contact) section.
 
@@ -99,7 +99,7 @@ Below are two examples of output, obtained from a panoramic radiograph of the au
 
 **Output Images (Grad-CAM and Overlay respectively):**
 
-![Grad-CAM and Overlay](https://i.postimg.cc/G2JKkyGf/Bruno-Scholles-Radiography-saliency-overlay-20240212162822.png)
+![Grad-CAM and Overlay](https://i.ibb.co/BCxWnY0/Bruno-Scholles-Radiography-saliency-overlay-20240212162822.png)
 
 **Output JSON:**
 
