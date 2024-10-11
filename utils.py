@@ -56,7 +56,7 @@ def train_resize(model_name, personalized_resize):
         'efficientnet-b6': (528, 528), 'efficientnet-b7': (600, 600), 'fastvit_t8': (256, 256),
         'fastvit_t12': (256, 256), 'fastvit_s12': (256, 256), 'fastvit_sa12': (256, 256),
         'fastvit_sa24': (256, 256), 'fastvit_sa36': (256, 256), 'fastvit_ma36': (256, 256),
-        'swinv2_b': (600, 600)
+        'swinv2_b': (600, 600), 'swin_base': (224, 224)
     }
 
     return resize_mapping.get(model_name, None)
@@ -67,9 +67,11 @@ def load_model(model_name, n_classes):
     if "efficientnet-" in model_name:
         model = EfficientNet.from_pretrained(model_name)
     elif "fastvit" in model_name:
-        model = create_model(model_name+'.apple_in1k', num_classes=n_classes)
+        model = create_model(model_name+'.apple_in1k', num_classes=n_classes, pretrained=True)
     elif "swinv2" in model_name: # Not working
-        model = create_model('swinv2_base_window12to24_192to384.ms_in22k_ft_in1k', num_classes=n_classes, pretrained=False)
+        model = create_model('swinv2_base_window12to24_192to384.ms_in22k_ft_in1k', num_classes=n_classes, pretrained=True)
+    elif "swin_base" in model_name: # Not working
+        model = create_model('swin_base_patch4_window7_224', num_classes=n_classes, pretrained=True)
     else:
         raise ValueError("ERROR: Model does not exist or is not implemented. Please check if you have entered the model name correctly.")
     

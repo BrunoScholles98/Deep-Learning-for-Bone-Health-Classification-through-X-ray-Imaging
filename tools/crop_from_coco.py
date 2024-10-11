@@ -28,13 +28,13 @@ def obter_dimensoes_recorte(caminho_imagem):
     return tam_recorte
 
 # Caminho para o arquivo COCO JSON contendo as informações das bounding boxes
-coco_json_path = "/d01/scholles/gigasistemica/datasets/CVAT_raw/NEW_CVAT_Osteo/C2/annotations/instances_default.json"
+coco_json_path = "/d01/scholles/gigasistemica/datasets/DXA_HUB/RAW_NOTATIONS/DXA_HUB_C3/annotations/instances_default.json"
 
 # Caminho para a pasta onde as imagens originais estão armazenadas
-imagens_pasta = "/d01/scholles/gigasistemica/datasets/CVAT_raw/NEW_CVAT_Osteo/C2/images"
+imagens_pasta = "/d01/scholles/gigasistemica/datasets/DXA_HUB/RAW_NOTATIONS/DXA_HUB_C3/images"
 
 # Caminho para a pasta onde as imagens recortadas serão salvas
-salvar_pasta = "/d01/scholles/gigasistemica/datasets/CVAT_raw/RAW_NEW_CVAT_C1_C2_C3_Cropped_600x600/C2"
+salvar_pasta = "/d01/scholles/gigasistemica/datasets/DXA_HUB/RAW_CROPPED_PR"
 
 # Tamanho desejado para as imagens recortadas
 tamanho_recorte = 600
@@ -54,7 +54,7 @@ for img_info in tqdm(coco_data["images"], desc="Recortando imagens"):
 
     # Obter as bounding boxes da imagem
     bboxes = [bbox["bbox"] for bbox in coco_data["annotations"] if bbox["image_id"] == img_id]
-
+    
     # Iterar sobre as bounding boxes e recortar as imagens
     for bbox in bboxes:
         x, y, w, h = bbox
@@ -82,7 +82,7 @@ for img_info in tqdm(coco_data["images"], desc="Recortando imagens"):
         img_recortada = cv2.resize(img_recortada, (tamanho_recorte, tamanho_recorte))
 
         # Salvar a imagem recortada
-        nome_salvar = f"img_{img_filename}_bbox_{bbox}.jpg"
+        nome_salvar = f"{img_filename.replace('.jpg', '')}_bbox_{x}_{y}_{w}_{h}.jpg"
         caminho_salvar = os.path.join(salvar_pasta, nome_salvar)
         cv2.imwrite(caminho_salvar, img_recortada)
 

@@ -16,6 +16,7 @@ from sklearn.metrics import roc_auc_score
 import random
 import tqdm
 import json
+import argparse
 
 import utils
 
@@ -24,9 +25,13 @@ os.system('cls' if os.name == 'nt' else 'clear')
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(DEVICE)
 
+parser = argparse.ArgumentParser(description='Configurações do treinamento.')
+parser.add_argument('--model', type=str, help='Nome do modelo')
+args = parser.parse_args()
+
 # Caracteristicas do Treinamento
-MODEL = 'swinv2_b'
-BATCH_SIZE = 32
+MODEL = args.model
+BATCH_SIZE = 4
 EPOCHS = 100
 LOG_INTERVAL = 10
 PERS_RESIZE_NUM = 3
@@ -34,14 +39,13 @@ REDUCELRONPLATEAU = True
 PERSONALIZED_RESIZE = True
 
 # Paths
-DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3')
+DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/SIMPLE_TRAIN/FULL_PR')
 TRAIN_NAME = utils.generate_training_name(MODEL, DATASET_PATH, BATCH_SIZE, EPOCHS)
-OUTPUT_PATH = Path('/d01/scholles/gigasistemica/saved_models/Full_Img/' + TRAIN_NAME)
+OUTPUT_PATH = Path('/d01/scholles/gigasistemica/saved_models/Full_Dataset_Train_Paper/FULL_PR/' + TRAIN_NAME)
 MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '.pth')
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 TENSORBOARD_LOG = OUTPUT_PATH / 'log'
 STATS_PATH = OUTPUT_PATH / 'stats.txt'
-IMG_RESIZE_PATH = '/d01/scholles/gigasistemica/datasets/CVAT_train/augmented/AUG_NEW_RB_CVAT_Train_FULL_IMG_C1_C3/test/C3/OPHUB2017-0046.jpg'
 
 NUM_CLASSES = len([subfolder for subfolder in (DATASET_PATH / 'train').iterdir() if subfolder.is_dir()])
 

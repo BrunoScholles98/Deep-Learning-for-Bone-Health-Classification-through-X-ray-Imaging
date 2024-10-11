@@ -24,7 +24,7 @@ os.system('cls' if os.name == 'nt' else 'clear')
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Caracteristicas do Treinamento
-MODEL = 'fastvit_s12'
+MODEL = 'swin_base'
 BATCH_SIZE = 8
 EPOCHS = 100
 LOG_INTERVAL = 5
@@ -35,7 +35,7 @@ BETAS_LR = (0.9, 0.999)  # Valores padrão, mas você pode ajustá-los se deseja
 NFOLDS = 5
 
 # Paths
-DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/KFOLD_DATASETS/UNITED_RB_CVAT_Cropped_600x600_C1_C3')
+DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/KFOLD_DATASETS_CVAT/RB_CVAT_Cropped_600x600_C1_C3')
 TRAIN_NAME = utils.generate_training_name(MODEL, DATASET_PATH, BATCH_SIZE, EPOCHS)
 OUTPUT_PATH = Path('/d01/scholles/gigasistemica/saved_models/debug/' + TRAIN_NAME)
 MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '_test.pth')
