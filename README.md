@@ -13,7 +13,9 @@
 
 This project is a key component of GigaSistêmica, a collaborative initiative with GigaCandanga, dedicated to advancing diagnostic and predictive capabilities for systemic diseases using dental radiographs. My primary role in this endeavor is to pioneer the development of a neural network-driven system tailored to classify patients' bone health and detect osteoporosis, leveraging panoramic radiographic images. The ultimate aim is to expedite the diagnostic and treatment pathways for patients, with a particular focus on enhancing efficiency within the Brazilian public health system.
 
-While the research is still ongoing, the current repository contains essential elements used in training EfficientNet and conducting network evaluations. Additionally, it includes tools for data pre-processing and Grad-CAM Visualization. However, the organization of these resources is a work in progress. Efforts will be made in the future to enhance the overall structure and coherence of the codebase and associated files. It is worth noting that an article detailing the findings of this research has been accepted for publication in the journal _Biomedical Signal Processing and Control_ and is currently awaiting publication by the editorial team.
+While our research is still in progress, this repository provides essential components used for training EfficientNet and conducting network evaluations. It also includes tools for data pre-processing and Grad-CAM visualization. Please note that the organization of these resources is a work in progress; future efforts will focus on enhancing the overall structure and coherence of the codebase and associated files. If you use this work, please cite:
+
+Dias, B. S. S., Querrer, R., Figueiredo, P. T., Leite, A. F., de Melo, N. S., Costa, L. R., Caetano, M. F., & Farias, M. C. Q. (2025). *Osteoporosis screening: Leveraging EfficientNet with complete and cropped facial panoramic radiography imaging*. **Biomedical Signal Processing and Control**, *100*, 107031. [https://doi.org/10.1016/j.bspc.2024.107031](https://doi.org/10.1016/j.bspc.2024.107031)
 
 <a name="req"></a>
 ## 2. Requirements
