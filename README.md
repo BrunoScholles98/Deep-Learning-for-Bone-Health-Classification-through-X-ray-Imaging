@@ -15,7 +15,7 @@ This project is a key component of GigaSistêmica, a collaborative initiative wi
 
 While our research is still in progress, this repository provides essential components used for training EfficientNet and conducting network evaluations. It also includes tools for data pre-processing and Grad-CAM visualization. Please note that the organization of these resources is a work in progress; future efforts will focus on enhancing the overall structure and coherence of the codebase and associated files. If you use this work, please cite:
 
-Dias, B. S. S., Querrer, R., Figueiredo, P. T., Leite, A. F., de Melo, N. S., Costa, L. R., Caetano, M. F., & Farias, M. C. Q. (2025). *Osteoporosis screening: Leveraging EfficientNet with complete and cropped facial panoramic radiography imaging*. **Biomedical Signal Processing and Control**, *100*, 107031. [https://doi.org/10.1016/j.bspc.2024.107031](https://doi.org/10.1016/j.bspc.2024.107031)
+- Dias, B. S. S., Querrer, R., Figueiredo, P. T., Leite, A. F., de Melo, N. S., Costa, L. R., Caetano, M. F., & Farias, M. C. Q. (2025). *Osteoporosis screening: Leveraging EfficientNet with complete and cropped facial panoramic radiography imaging*. **Biomedical Signal Processing and Control**, *100*, 107031. [https://doi.org/10.1016/j.bspc.2024.107031](https://doi.org/10.1016/j.bspc.2024.107031)
 
 <a name="req"></a>
 ## 2. Requirements
