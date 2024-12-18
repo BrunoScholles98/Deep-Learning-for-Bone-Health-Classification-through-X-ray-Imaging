@@ -114,7 +114,7 @@ Should you encounter any difficulties, do not hesitate to reach out to me via th
 <a name="contact"></a>
 ## 4. Contact
 
-Please feel free to reach out with any comments, questions, reports, or suggestions via email at brunoscholles98@gmail.com. Additionally, you can contact me via WhatsApp at +55 61 992598713.
+Please feel free to reach out with any comments, questions, reports, or suggestions via email at brunoscholles98@gmail.com. Additionally, you can contact me via WhatsApp at +351 913 686 499.
 
 <a name="thanks"></a>
 ## 5. Thanks
