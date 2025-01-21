@@ -78,7 +78,7 @@ If you intend to utilize these scripts for alternative applications, adjust the 
 
 This repository contains a **fully functional script for diagnosing full panoramic radiographic images**. The script includes automatic preprocessing steps for the image, applying the Rolling Ball algorithm to remove the background and standardize the input images. Additionally, the code downsizes the image and feeds it into the neural network, which returns a JSON with the diagnosis and the paths of the two output images - the Grad-CAM visualization images and the Grad-CAM overlay on the original image.
 
-To execute the script, **it is necessary to have the trained model, available at the following** [link](https://www.dropbox.com/scl/fo/03ng3uilv0vkd63zz9z5b/h?rlkey=dca4hj87xvcdr21atqi4fguxp&dl=0). Follow the steps below:
+To execute the script, **it is necessary to have the trained model, available at the following** [link](https://drive.google.com/drive/folders/1YFAVozFdCECryu5H0LWunT3ug_mMBL77?usp=sharing). Follow the steps below:
 
 1. Download the trained model from the provided link.
 2. Execute the script in the console using the following command:
