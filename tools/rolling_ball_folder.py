@@ -31,6 +31,6 @@ def transform_images_in_folder(input_folder, output_folder):
                 cv2.imwrite(output_image_path, final_img)
 
 if __name__ == '__main__':
-    input_folder = "/d01/scholles/gigasistemica/datasets/DXA_HUB/RAW_CROPPED_PR"
-    output_folder = "/d01/scholles/gigasistemica/datasets/DXA_HUB/RB_CROPPED_PR"
+    input_folder = "/mnt/ssd/brunoscholles/GigaSistemica/Datasets/DXA_Osteo_Images"
+    output_folder = "/mnt/ssd/brunoscholles/GigaSistemica/Datasets/RB_DXA_Osteo_Images"
     transform_images_in_folder(input_folder, output_folder)
