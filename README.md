@@ -11,7 +11,7 @@
 <a name="desc"></a>
 ## 1. Project Description and Status
 
-This project is a key component of GigaSistêmica, a collaborative initiative between GigaCandanga and the University of Brasília, dedicated to advancing diagnostic and predictive capabilities for systemic diseases using dental radiographs. The primary goal of this project is to develop a neural network-driven system tailored to classify patients' bone health and detect osteoporosis, leveraging panoramic radiographic images. The aim is to expedite diagnostic and treatment pathways for patients, with a particular focus on enhancing efficiency within the Brazilian public health system.
+This project is a key component of [GigaSistêmica](https://github.com/BrunoScholles98/GigaSistemica-Advancing-Systemic-Health-Diagnostics-through-AI), a collaborative initiative between GigaCandanga and the University of Brasília. GigaSistêmica aims to revolutionize diagnostic and predictive capabilities for systemic diseases through the integration of AI and medical imaging technologies. Specifically, this project focuses on leveraging dental radiographs to classify patients' bone health and detect osteoporosis using neural network-driven systems. The goal is to streamline diagnostics and treatments, with a particular emphasis on improving efficiency in the Brazilian public health system.
 
 This repository is part of an academically published work, but its development is ongoing. It provides essential components for training various neural networks, conducting network evaluations, and includes tools for data pre-processing and Grad-CAM visualization. If you use this work, please cite:
 
@@ -78,7 +78,7 @@ If you intend to utilize these scripts for alternative applications, adjust the 
 
 This repository contains a **fully functional script for diagnosing full panoramic radiographic images**. The script includes automatic preprocessing steps for the image, applying the Rolling Ball algorithm to remove the background and standardize the input images. Additionally, the code downsizes the image and feeds it into the neural network, which returns a JSON with the diagnosis and the paths of the two output images - the Grad-CAM visualization images and the Grad-CAM overlay on the original image.
 
-To execute the script, **it is necessary to have the trained model, available at the following** [link](https://www.dropbox.com/scl/fo/03ng3uilv0vkd63zz9z5b/h?rlkey=dca4hj87xvcdr21atqi4fguxp&dl=0). Follow the steps below:
+To execute the script, **it is necessary to have the trained model, available at the following** [link](https://drive.google.com/drive/folders/1YFAVozFdCECryu5H0LWunT3ug_mMBL77?usp=sharing). Follow the steps below:
 
 1. Download the trained model from the provided link.
 2. Execute the script in the console using the following command:
