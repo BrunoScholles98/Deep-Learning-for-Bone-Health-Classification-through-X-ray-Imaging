@@ -70,9 +70,9 @@ The codes operate for networks trained with both complete images and those train
 
 Below are two examples of the visualizations that will be available in the provided codes: the first one for complete radiographs and the second one for radiograph crops.
 
-![](https://i.imghippo.com/files/2vYCY1727776056.png)
+![](https://i.ibb.co/RpbzTgJY/Osteo1.png)
 
-![](https://i.imghippo.com/files/Eed3Z1727776100.png)
+![](https://i.ibb.co/prkg6VXf/Osteo2.png)
 
 If you intend to utilize these scripts for alternative applications, adjust the code structure accordingly based on the provided logic. Should you encounter any difficulties, do not hesitate to reach out to me via the [Contact](#contact) section.
 
@@ -103,7 +103,7 @@ Below are two examples of output, obtained from a panoramic radiograph of the au
 
 **Output Images (Grad-CAM and Overlay respectively):**
 
-![Grad-CAM and Overlay](https://i.imghippo.com/files/Rit0F1727776134.png)
+![Grad-CAM and Overlay](https://i.ibb.co/JWCHBthJ/OsteoMe.png)
 
 **Output JSON:**
 
