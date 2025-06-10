@@ -103,7 +103,7 @@ Below are two examples of output, obtained from a panoramic radiograph of the au
 
 **Output Images (Grad-CAM and Overlay respectively):**
 
-![Grad-CAM and Overlay](https://i.ibb.co/JWCHBthJ/OsteoMe.png)
+![Grad-CAM and Overlay](https://i.ibb.co/gMB952P5/OsteoMe.png)
 
 **Output JSON:**
 
