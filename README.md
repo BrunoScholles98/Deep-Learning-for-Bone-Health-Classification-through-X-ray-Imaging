@@ -19,6 +19,8 @@ This repository is part of an academically published work, but its development i
 
 **Status:** As a direct continuation of this project, we are now working on developing a system to classify osteoporosis using CT images as well. In the `CT_Tests` folder, you will find code for visualization, data processing, and training of various networks, including ViTs and 3D CNNs. Although the code is not yet organized, it is available for those interested in following the progress of this study group.
 
+🔗 **Main Project Repository**: [GigaSistêmica – Advancing Systemic Health Diagnostics through AI](https://github.com/BrunoScholles98/GigaSistemica-Advancing-Systemic-Health-Diagnostics-through-AI)
+
 <a name="req"></a>
 ## 2. Requirements
 
