@@ -11,7 +11,7 @@
 <a name="desc"></a>
 ## 1. Project Description and Status
 
-This project is a key component of [GigaSistêmica](https://github.com/BrunoScholles98/GigaSistemica-Advancing-Systemic-Health-Diagnostics-through-AI), a collaborative initiative between GigaCandanga and the University of Brasília. GigaSistêmica aims to revolutionize diagnostic and predictive capabilities for systemic diseases through the integration of AI and medical imaging technologies. Specifically, this project focuses on leveraging dental radiographs to classify patients' bone health and detect osteoporosis using neural network-driven systems. The goal is to streamline diagnostics and treatments, with a particular emphasis on improving efficiency in the Brazilian public health system.
+This project is a key component of [GigaSistêmica](https://github.com/GIGASISTEMICA/GigaSistemica-Advancing-Systemic-Health-Diagnostics-through-AI), a collaborative initiative between GigaCandanga and the University of Brasília. GigaSistêmica aims to revolutionize diagnostic and predictive capabilities for systemic diseases through the integration of AI and medical imaging technologies. Specifically, this project focuses on leveraging dental radiographs to classify patients' bone health and detect osteoporosis using neural network-driven systems. The goal is to streamline diagnostics and treatments, with a particular emphasis on improving efficiency in the Brazilian public health system.
 
 This repository is part of an academically published work, but its development is ongoing. It provides essential components for training various neural networks, conducting network evaluations, and includes tools for data pre-processing and Grad-CAM visualization. If you use this work, please cite:
 
