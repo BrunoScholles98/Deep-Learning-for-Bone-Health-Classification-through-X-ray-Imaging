@@ -65,7 +65,7 @@ def train_resize(model_name, personalized_resize):
 def load_model(model_name, n_classes):
     # Load the appropriate model based on the model name
     if "efficientnet-" in model_name:
-        model = EfficientNet.from_pretrained(model_name)
+        model = EfficientNet.from_pretrained(model_name, num_classes=n_classes)
     elif "fastvit" in model_name:
         model = create_model(model_name+'.apple_in1k', num_classes=n_classes, pretrained=True)
     elif "swinv2" in model_name: # Not working

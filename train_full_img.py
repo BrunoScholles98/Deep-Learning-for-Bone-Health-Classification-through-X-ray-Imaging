@@ -53,9 +53,9 @@ except Exception:
 
 # Paths
 # Agora DATASET_PATH aponta para a PASTA RAIZ com subpastas = classes (sem train/val/test)
-DATASET_PATH = Path('/d01/scholles/gigasistemica/datasets/SIMPLE_TRAIN/FULL_PR')
+DATASET_PATH = Path('/mnt/nas/BrunoScholles/Gigasistemica/Datasets/OP_Rolling_Ball_Imgs')
 TRAIN_NAME = utils.generate_training_name(MODEL, DATASET_PATH, BATCH_SIZE, EPOCHS)
-OUTPUT_PATH = Path('/d01/scholles/gigasistemica/saved_models/Full_Dataset_Train_Paper/FULL_PR/' + TRAIN_NAME)
+OUTPUT_PATH = Path('/mnt/nas/BrunoScholles/Gigasistemica/Models/test_efficient/' + TRAIN_NAME)
 MODEL_SAVING_PATH = OUTPUT_PATH.joinpath(TRAIN_NAME + '.pth')
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 TENSORBOARD_LOG = OUTPUT_PATH / 'log'
@@ -65,9 +65,10 @@ RESIZE = utils.train_resize(MODEL, PERSONALIZED_RESIZE)
 print("Resize:", RESIZE)
 
 writer = SummaryWriter(TENSORBOARD_LOG)
+NUM_CLASSES = None
 
 def validate_model(model, criterion, val_dl, all_steps_counter_val, writer):
-    accuracy_fnc = Accuracy().to(DEVICE)
+    accuracy_fnc = Accuracy(task='multiclass', num_classes=NUM_CLASSES).to(DEVICE)
     mean_loss_validation = 0
     val_epoch_accuracy = 0
 
@@ -106,7 +107,7 @@ def train_one_step(model, optimizer, criterion, inputs, labels):
 
 
 def train_by_one_epoch(model, criterion, optimizer, train_dl, all_steps_counter_train, writer):
-    accuracy_fnc = Accuracy().to(DEVICE)
+    accuracy_fnc = Accuracy(task='multiclass', num_classes=NUM_CLASSES).to(DEVICE)
     mean_loss_train = 0
     train_epoch_accuracy = 0
 
@@ -219,6 +220,7 @@ def main():
 
     # Dataset único (apenas raiz com subpastas de classes)
     full_dataset = ImageFolder(DATASET_PATH, transform=transform)
+    global NUM_CLASSES
     NUM_CLASSES = len(full_dataset.classes)
     print(f'Classes ({NUM_CLASSES}): {full_dataset.classes}')
 
