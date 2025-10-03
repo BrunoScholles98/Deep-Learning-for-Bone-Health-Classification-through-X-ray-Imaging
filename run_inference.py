@@ -12,8 +12,8 @@ from tqdm import tqdm
 
 # Paths and settings
 MODEL_PATH = '/mnt/ssd/brunoscholles/GigaSistemica/Models/Osteoporosis/efficientnet-b7_FULL_IMG_C1_C3.pth'
-INPUT_FOLDER = '/mnt/ssd/brunoscholles/GigaSistemica/Datasets/DXA_Osteo_Images'
-OUTPUT_FOLDER = '/mnt/ssd/brunoscholles/GigaSistemica/Datasets_Tests/DXA_Osteo_Test'
+INPUT_FOLDER = '/mnt/nas/BrunoScholles/Gigasistemica/Datasets/SLM/ATH_SLM_resized'
+OUTPUT_FOLDER = '/mnt/nas/BrunoScholles/Gigasistemica/SLM_Outputs/Sep_Atheroma_Dataset/Osteo'
 PERSONALIZED_RESIZE = True
 CUSTOM_RESIZE = (449, 954)
 model_resize_map = {
@@ -40,6 +40,8 @@ if match:
 if PERSONALIZED_RESIZE:
     RESIZE = CUSTOM_RESIZE
 else:
+    if MODEL is None:
+        raise ValueError("Could not determine model type from MODEL_PATH for resize.")
     RESIZE = model_resize_map.get(MODEL)
     if not RESIZE:
         raise ValueError("No resize size for selected model.")
@@ -56,11 +58,14 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 
 inv_normalize = transforms.Normalize(mean=[-0.485/0.229, -0.456/0.224, -0.406/0.255], std=[1/0.229, 1/0.224, 1/0.255])
 transform = transforms.Compose([transforms.Resize(RESIZE), transforms.ToTensor(), normalize])
 
-def save_image_with_metadata(img_array, img_path, tag, flag, out_dir):
+def save_image_with_metadata(img_array, img_path, tag, flag, out_dir, is_normalized=True):
     base = os.path.splitext(os.path.basename(img_path))[0]
     name = f"{base}_{tag}_{flag}.png"
     path = os.path.join(out_dir, name)
-    Image.fromarray((img_array * 255).astype(np.uint8)).save(path, "PNG")
+    save_array = img_array
+    if is_normalized:
+        save_array = (img_array * 255)
+    Image.fromarray(save_array.astype(np.uint8)).save(path, "PNG")
     return path
 
 
@@ -81,17 +86,21 @@ def saliency(img, model, img_path, out_dir):
         img_orig = inv_normalize(inp[0].cpu())
     orig = np.clip(np.transpose(img_orig.numpy(), (1,2,0)), 0, 1)
 
-    cmap = plt.cm.hot(sal_map.numpy())
+    cmap = plt.get_cmap('hot')(sal_map.numpy())
     red = cmap[:,:,0] * 1.5
     red = np.where(red < 0.3, 0, red)
-    overlay = np.clip(orig + red[:,:,None], 0, 1)
+
+    # Criar uma sobreposição vermelha em vez de branca
+    red_overlay = np.zeros_like(orig)
+    red_overlay[:,:,0] = red
+    overlay = np.clip(orig + red_overlay, 0, 1)
 
     flag = "true" if idx.item() == 1 else "false"
-    diagnosis = labels[idx.item()]
+    diagnosis = labels[int(idx.item())]
 
-    sal_path = save_image_with_metadata(cmap, img_path, "saliency", flag, out_dir)
-    ov_path = save_image_with_metadata(overlay, img_path, "overlay", flag, out_dir)
-    return diagnosis, sal_path, ov_path
+    sal_path = save_image_with_metadata(cmap, img_path, "saliency", flag, out_dir, is_normalized=True)
+    ov_path = save_image_with_metadata(overlay, img_path, "overlay", flag, out_dir, is_normalized=True)
+    return diagnosis, sal_path, ov_path, flag
 
 
 def rolling_ball(image_path, radius=180):
@@ -127,8 +136,12 @@ def main():
             bg = rolling_ball(path)
             pil_img = Image.fromarray(bg.astype('uint8'), 'L').convert('RGB')
 
-            diag, sal_path, ov_path = saliency(pil_img, model, path, OUTPUT_FOLDER)
+            diag, sal_path, ov_path, flag = saliency(pil_img, model, path, OUTPUT_FOLDER)
+
+            rb_path = save_image_with_metadata(bg, path, "rolling_ball", flag, OUTPUT_FOLDER, is_normalized=False)
+
             tqdm.write(f"Result for {os.path.basename(path)}: {diag}")
+            tqdm.write(f"Saved rolling ball image: {rb_path}")
             tqdm.write(f"Saved saliency map: {sal_path}")
             tqdm.write(f"Saved overlay: {ov_path}")
             tqdm.write("-"*40)
