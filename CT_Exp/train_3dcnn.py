@@ -22,9 +22,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import logging
 
-# ----------------------------------------------------------------------------
-#                            GLOBAL VARIABLES
-# ----------------------------------------------------------------------------
+# Global variables
 DATA_DIR = '/mnt/ssd/brunoscholles/GigaSistemica/Datasets/TM_3D_64Stacks_Coronal'  # Adjust to your path
 MODEL_NAME = 'r3d_18'
 NUM_CLASSES = 2
@@ -41,7 +39,6 @@ EARLY_STOPPING = 10
 USE_AMP = False
 AUG_INTENSITY = 0.5
 RUN_LEAVE_ONE_OUT = True
-# ----------------------------------------------------------------------------
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
@@ -64,9 +61,7 @@ param_config = {
     "AUG_INTENSITY": AUG_INTENSITY
 }
 
-# ----------------------------------------------------------------------------
-#                          Utility / Reproducibility
-# ----------------------------------------------------------------------------
+# Utility / Reproducibility
 
 def set_seed(seed: int):
     """Freeze random generators for reproducibility."""
@@ -78,9 +73,7 @@ def set_seed(seed: int):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-# ----------------------------------------------------------------------------
-#       Function to unify the shape of the 3 views with zero‑padding
-# ----------------------------------------------------------------------------
+# Function to unify the shape of the 3 views with zero‑padding
 
 def unify_shape_2d(axial, coronal, sagittal):
     """Pad the three 2‑D views so they share the same H×W."""
@@ -100,9 +93,7 @@ def unify_shape_2d(axial, coronal, sagittal):
     sagittal_pad = pad_to(sagittal, H, W)
     return axial_pad, coronal_pad, sagittal_pad
 
-# =============================================================================
-#                    Custom 3‑D Volume Transforms
-# =============================================================================
+# Custom 3‑D Volume Transforms
 
 class Resize3D:
     """Resize spatial dimensions (H and W) in a 3‑D volume."""
@@ -172,9 +163,7 @@ class MedicalVolumeAugmentations3D:
         return self.train_transform if train else self.val_transform
 
 
-# ----------------------------------------------------------------------------
-#                          Dataset definition
-# ----------------------------------------------------------------------------
+# Dataset definition
 
 class MedicalImageStackDataset(Dataset):
     """Dataset that loads volumes saved as .npy."""
@@ -243,9 +232,7 @@ class MedicalImageStackDataset(Dataset):
             vol = self.transform(vol)
         return vol, label
 
-# ----------------------------------------------------------------------------
-#                        Model creation util
-# ----------------------------------------------------------------------------
+# Model creation util
 
 def create_model(num_classes: int):
     logger.info(f"Creating model {MODEL_NAME}")
@@ -253,9 +240,7 @@ def create_model(num_classes: int):
     model.fc = nn.Linear(model.fc.in_features, num_classes)
     return model
 
-# ----------------------------------------------------------------------------
-#               Training + evaluation for one split
-# ----------------------------------------------------------------------------
+# Training + evaluation for one split
 
 def train_evaluate(
     model,
@@ -390,9 +375,7 @@ def _compute_auc(labels, probs):
     else:
         return roc_auc_score(np.eye(probs.shape[1])[labels], probs, multi_class='ovr', average='weighted')
 
-# ----------------------------------------------------------------------------
-#                        Plot helpers (optional)
-# ----------------------------------------------------------------------------
+# Plot helpers (optional)
 
 def plot_confusion_matrix(cm, class_names, save_path):
     plt.figure(figsize=(6, 5))
@@ -403,9 +386,7 @@ def plot_confusion_matrix(cm, class_names, save_path):
     plt.savefig(save_path)
     plt.close()
 
-# ----------------------------------------------------------------------------
-#                    Leave‑One‑Out Cross‑Validation
-# ----------------------------------------------------------------------------
+# Leave‑One‑Out Cross‑Validation
 
 class SubsetWithTransform(Dataset):
     """Aplica um transform específico a um torch.utils.data.Subset."""
@@ -421,7 +402,7 @@ class SubsetWithTransform(Dataset):
         if self.transform is not None: # transforma aqui
             x = self.transform(x)
         return x, y
-# ---------------------------------------------------------------------------
+
 
 
 def run_leave_one_out():
@@ -516,9 +497,7 @@ def run_leave_one_out():
     df.to_csv(os.path.join(base_out, 'loo_summary.csv'), index=False)
     logger.info("LOO concluído. Resumo:\n" + df.tail(1).to_string(index=False))
 
-# ----------------------------------------------------------------------------
-#                                   main()
-# ----------------------------------------------------------------------------
+# main()
 
 def standard_train():
     """Original training (train vs test split)."""

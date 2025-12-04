@@ -17,9 +17,7 @@ import torch.nn.functional as F
 import torchvision.models as models
 from einops import repeat
 
-# ---------------------------------------------------------------------------
 # 3-D CNN
-# ---------------------------------------------------------------------------
 class CNN3DBlock(nn.Module):
     def __init__(self, in_ch: int, out_ch: int = 32):
         super().__init__()
@@ -33,9 +31,7 @@ class CNN3DBlock(nn.Module):
         x = F.relu(self.bn2(self.conv2(x)), inplace=True)
         return x
 
-# ---------------------------------------------------------------------------
-# 2-D CNN + projeção
-# ---------------------------------------------------------------------------
+# 2-D CNN + projection
 class ExtractAndProject(nn.Module):
     def __init__(self, in_ch: int, proj_dim: int = 256):
         super().__init__()
@@ -68,9 +64,7 @@ class ExtractAndProject(nn.Module):
         feat = self.proj(feat)                     # (B·3N,256)
         return feat.view(B, 3*H, -1)               # (B,3N,d)
 
-# ---------------------------------------------------------------------------
-# Embedding dinâmico
-# ---------------------------------------------------------------------------
+# Dynamic embedding
 class EmbeddingLayer(nn.Module):
     def __init__(self, emb: int = 256):
         super().__init__()
@@ -101,9 +95,7 @@ class EmbeddingLayer(nn.Module):
         x += self.pos[:x.size(1)]               # corta conforme L
         return x
 
-# ---------------------------------------------------------------------------
-# Transformer (8 camadas, 8 heads)
-# ---------------------------------------------------------------------------
+# Transformer (8 layers, 8 heads)
 class MHSA(nn.Module):
     def __init__(self, emb=256, heads=8):
         super().__init__()
@@ -137,17 +129,13 @@ class Transformer(nn.Sequential):
             ]
         super().__init__(*layers)
 
-# ---------------------------------------------------------------------------
-# Classificador
-# ---------------------------------------------------------------------------
+# Classifier
 class Classifier(nn.Module):
     def __init__(self, emb=256, n_cls=2):
         super().__init__(); self.fc = nn.Linear(emb, n_cls)
     def forward(self,x): return self.fc(x[:,0])
 
-# ---------------------------------------------------------------------------
-# Modelo completo
-# ---------------------------------------------------------------------------
+# Complete model
 class M3T(nn.Module):
     def __init__(self,
                  in_ch: int = 1,
@@ -167,9 +155,7 @@ class M3T(nn.Module):
     def forward(self, x):
         return self.head(self.backbone(x))
 
-# ---------------------------------------------------------------------------
-# quick check
-# ---------------------------------------------------------------------------
+# Quick check
 if __name__ == "__main__":
     B = 2; C = 3; D = H = W = 112
     dummy = torch.randn(B,C,D,H,W)

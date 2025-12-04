@@ -15,9 +15,7 @@ from pathlib import Path
 from tqdm import tqdm
 import utils
 
-# ==========================================
-# CONFIGURATION
-# ==========================================
+# Configuration
 # Set these variables to configure the training
 USE_CROPPED_IMAGES = False   # Set to True for cropped images, False for full images
 USE_KFOLD = False            # Set to True for K-Fold CV, False for simple train/test split
@@ -48,9 +46,7 @@ if len(GPU_IDS) > 1:
 # You can change the default model here or pass it via command line args if implemented
 DEFAULT_MODEL = 'swin_base' if USE_CROPPED_IMAGES else 'efficientnet-b1'
 
-# ==========================================
-# PATHS AND CONSTANTS
-# ==========================================
+# Paths and constants
 def get_dataset_path(use_cropped, use_kfold):
     if use_cropped:
         if use_kfold:
@@ -95,9 +91,7 @@ print(f"Output Path: {OUTPUT_PATH}")
 print(f"Resize Dimensions: {RESIZE}")
 print(f"Model: {MODEL}")
 
-# ==========================================
-# HELPER CLASSES AND FUNCTIONS
-# ==========================================
+# Helper classes and functions
 
 class CustomDataset(Dataset):
     def __init__(self, subset, transform=None):
@@ -257,9 +251,7 @@ def test_model(model, test_loader):
             
     return y_true, y_pred
 
-# ==========================================
-# MAIN EXECUTION
-# ==========================================
+# Main execution
 def main():
     # Transforms
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],

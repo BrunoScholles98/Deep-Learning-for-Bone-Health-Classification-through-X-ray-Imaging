@@ -7,9 +7,7 @@ Cada amostra  ➜  tensor (3, D, H, W)
 Todas as variáveis de configuração são globais.
 """
 
-# ---------------------------------------------------------------------------
-# CONFIG
-# ---------------------------------------------------------------------------
+# Configuration
 DATA_DIR      = "/mnt/ssd/brunoscholles/GigaSistemica/Datasets/TM_3D_64Stacks_3_Views"
 OUTPUT_ROOT   = "/mnt/ssd/brunoscholles/GigaSistemica/Models/TC_Models"
 
@@ -22,7 +20,7 @@ EARLY_STOP    = 7
 SEED          = 42
 OUT_CHANNELS  = 16
 NUM_CLASSES   = 2
-# ---------------------------------------------------------------------------
+
 
 import os, random, json, logging
 from datetime import datetime

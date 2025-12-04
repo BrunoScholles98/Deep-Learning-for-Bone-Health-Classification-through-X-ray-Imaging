@@ -20,9 +20,7 @@ output_folder/
         │   └── …
         └── (test class 1 may have an 'i' subfolder if needed)
 """
-# ======================================================================
-# IMPORTS
-# ======================================================================
+# Imports
 import os
 import nrrd
 import numpy as np
@@ -31,9 +29,7 @@ import random
 import math
 from tqdm import tqdm
 
-# ======================================================================
-# HELPER FUNCTIONS
-# ======================================================================
+# Helper functions
 def normalize_to_255(array_slice: np.ndarray) -> np.ndarray:
     """Normalize a 2D slice to uint8 in [0, 255]."""
     arr = array_slice.astype(np.float32)
@@ -54,9 +50,7 @@ def get_3_views(im_data: np.ndarray, cx: int, cy: int, cz: int):
     return axial, coronal, sagittal
 
 
-# ======================================================================
-# CONFIGURATION
-# ======================================================================
+# Configuration
 # 1 = segmentations; 2 = random; 3 = center of segmentation
 # 4 = single stack (view); 5 = three views, 64 slices each
 data_collection_mode = 5
@@ -74,9 +68,7 @@ output_folder = rf"TM_3D_64Stacks_{selected_view}"
 
 train_split   = 0.8  # 80% train | 20% test
 
-# ======================================================================
-# PREPARE BASE DIRECTORIES
-# ======================================================================
+# Prepare base directories
 df = pd.read_excel(excel_ref)
 
 os.makedirs(output_folder, exist_ok=True)
@@ -90,9 +82,7 @@ train_size     = math.floor(len(patients) * train_split)
 train_patients = set(patients[:train_size])
 test_patients  = set(patients[train_size:])
 
-# ======================================================================
-# MAIN LOOP
-# ======================================================================
+# Main loop
 for patient_folder_name in tqdm(patients, desc="Processing patients"):
     patient_id = patient_folder_name.replace("Paciente", "")
 
