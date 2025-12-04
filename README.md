@@ -68,6 +68,7 @@ Open `train.py` and modify the configuration section at the top of the file to a
 # Configuration
 USE_CROPPED_IMAGES = True  # Set to True for cropped images, False for full images
 USE_KFOLD = True           # Set to True for K-Fold CV, False for simple train/test split
+GPU_IDS = [0]              # Select GPU IDs, e.g., [0] or [0, 1] for multi-GPU
 ```
 
 Before executing the script, remember to update the path of the root folder of your dataset and also the path of the results folder within the script code. The name of the generated folder is automatically defined for the evaluation of the results, being composed of the name of the used EfficientNet, the name of the dataset, and some training configurations.

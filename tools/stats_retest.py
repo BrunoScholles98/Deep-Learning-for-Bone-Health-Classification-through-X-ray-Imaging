@@ -34,10 +34,8 @@ def test_model(model, test_loader):
             y_pred += predicted.cpu().numpy().tolist()
     
     report = classification_report(y_true, y_pred, digits=4)
-    print(report)    
-
-    # Confirme que o arquivo foi salvo
-    print("Arquivo salvo com sucesso!")
+    print(report)
+    print("Stats saved successfully!")
 
 if __name__ == "__main__":
     MODEL_PATH = '/d01/scholles/gigasistemica/saved_models/old/efficientnet-b7_AUG_RB_CVAT_Train_C1_C2C3_Croped_600x600_Batch4_100Ep/efficientnet-b7_AUG_RB_CVAT_Train_Saudavel_DoenteGeral_Croped_600x600_Batch4_100Ep.pth'
@@ -56,7 +54,6 @@ if __name__ == "__main__":
     elif MODEL == 'efficientnet-b7':
         RESIZED = (600,600)
 
-    #load pretrained resnet model
     model = EfficientNet.from_pretrained(MODEL)
     state_dict = torch.load(MODEL_PATH)
     model.load_state_dict(state_dict)
@@ -65,13 +62,12 @@ if __name__ == "__main__":
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                         std=[0.229, 0.224, 0.225])
     
-    transform = transforms.Compose([ # Define as transformações que serão aplicadas às imagens
-        transforms.Resize(RESIZED), # redimensiona as imagens
-        transforms.ToTensor(), # converte as imagens para tensores
+    transform = transforms.Compose([
+        transforms.Resize(RESIZED),
+        transforms.ToTensor(),
         normalize
     ])
 
-    # Cria o conjunto de dados de teste
     test_dataset = ImageFolder(DATASET_PATH / "test", transform=transform)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 

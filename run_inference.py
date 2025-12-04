@@ -87,12 +87,14 @@ def saliency(img, model, img_path, out_dir):
     orig = np.clip(np.transpose(img_orig.numpy(), (1,2,0)), 0, 1)
 
     cmap = plt.get_cmap('hot')(sal_map.numpy())
-    red = cmap[:,:,0] * 1.5
-    red = np.where(red < 0.3, 0, red)
+    intensity = 1.5
+    red_channel = cmap[:, :, 0] * intensity
+    threshold = 0.3
+    red_channel = np.where(red_channel < threshold, 0, red_channel)
 
-    # Criar uma sobreposição vermelha em vez de branca
+    # Create a red overlay instead of white
     red_overlay = np.zeros_like(orig)
-    red_overlay[:,:,0] = red
+    red_overlay[:,:,0] = red_channel
     overlay = np.clip(orig + red_overlay, 0, 1)
 
     flag = "true" if idx.item() == 1 else "false"

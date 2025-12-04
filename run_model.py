@@ -18,7 +18,6 @@ MODEL_PATH = sys.argv[1]
 MODEL = 'efficientnet-' + re.findall(r'efficientnet-(b\d)', MODEL_PATH)[0] if re.findall(r'efficientnet-(b\d)', MODEL_PATH) else None
 PERSONALIZED_RESIZE = True
 
-# Definir as dimensões de redimensionamento da imagem de entrada
 if PERSONALIZED_RESIZE == True:
     RESIZE = (449, 954)
 else:
@@ -35,20 +34,18 @@ else:
     RESIZE = model_resize_map.get(MODEL, None)
 
 if RESIZE is None:
-    raise ValueError("Tamanho de redimensionamento não definido para o modelo selecionado.")
+    raise ValueError("Resize dimensions not defined for the selected model.")
 
 if 'C2C3' in MODEL_PATH:
     diagnosticos = {0: 'Healthy Bone', 1: 'Diseased Bone'}
 else:
     diagnosticos = {0: 'Healthy Patient', 1: 'Patient with Osteoporosis'}
 
-# Carregar o modelo EfficientNet pré-treinado
 device = torch.device('cpu')
 model = EfficientNet.from_pretrained(MODEL, MODEL_PATH)
 #state_dict = torch.load(MODEL_PATH, map_location=device)
 #model.load_state_dict(state_dict)
 
-# Definir as transformações para pré-processar a imagem de entrada no formato esperado pelo modelo
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                   std=[0.229, 0.224, 0.225])
 
@@ -64,11 +61,9 @@ transform = transforms.Compose([
 ])
 
 def save_image_with_metadata(image, img_path, image_type, output_path):
-    # Extrair o nome original da imagem do caminho
     img_name = os.path.basename(img_path)
     img_name, _ = os.path.splitext(img_name)
 
-    # Adicionar data e horário ao nome do arquivo
     current_time = datetime.now().strftime("%Y%m%d%H%M%S")
     file_name = f"{img_name}_{image_type}_{current_time}.png"
     file_path = os.path.join(output_path, file_name)
@@ -136,7 +131,6 @@ if __name__=="__main__":
             rmvd_background_img = Image.fromarray(rmvd_background_img.astype('uint8'), mode='L').convert('RGB')
             diagnosis, imagem_hot_path, overlay_path = saliency(rmvd_background_img, model, img_path, destination_path)
             
-            # Generate JSON output
             json_output = {
                 "result": "ok",
                 "diagnosis": diagnosis,
@@ -144,10 +138,7 @@ if __name__=="__main__":
                 "overlay_img_path": overlay_path
             }
 
-            # Convert the dictionary to a JSON string
             json_output_string = json.dumps(json_output)
-
-            # Print or do something else with the JSON string
             print(json_output_string)
         
         except:

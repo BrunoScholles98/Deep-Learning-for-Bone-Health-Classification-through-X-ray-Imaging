@@ -19,8 +19,8 @@ import utils
 # CONFIGURATION
 # ==========================================
 # Set these variables to configure the training
-USE_CROPPED_IMAGES = True   # Set to True for cropped images, False for full images
-USE_KFOLD = True            # Set to True for K-Fold CV, False for simple train/test split
+USE_CROPPED_IMAGES = False   # Set to True for cropped images, False for full images
+USE_KFOLD = False            # Set to True for K-Fold CV, False for simple train/test split
 
 # Hyperparameters
 BATCH_SIZE = 8 if USE_CROPPED_IMAGES else 4
@@ -33,8 +33,16 @@ NFOLDS = 5
 LOG_INTERVAL = 10
 
 # Device Configuration
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+GPU_IDS = [0] # Select GPU IDs, e.g., [0] or [0, 1]
+
+if torch.cuda.is_available() and GPU_IDS:
+    DEVICE = torch.device(f'cuda:{GPU_IDS[0]}')
+else:
+    DEVICE = torch.device('cpu')
+
 print(f"Using device: {DEVICE}")
+if len(GPU_IDS) > 1:
+    print(f"Using {len(GPU_IDS)} GPUs: {GPU_IDS}")
 
 # Model Configuration
 # You can change the default model here or pass it via command line args if implemented
@@ -107,17 +115,17 @@ class CustomDataset(Dataset):
 
 def make_stratified_splits(dataset, seed=42):
     """
-    Retorna índices (train_idx, val_idx, test_idx) com split estratificado 60/20/20.
+    Returns indices (train_idx, val_idx, test_idx) with 60/20/20 stratified split.
     Used for Simple + Full Image case.
     """
-    targets = dataset.targets  # lista de rótulos por amostra
+    targets = dataset.targets
     indices = list(range(len(targets)))
 
-    # 1) Train (60%) vs Temp (40%)
+    # Train (60%) vs Temp (40%)
     sss1 = StratifiedShuffleSplit(n_splits=1, test_size=0.4, random_state=seed)
     train_idx, temp_idx = next(sss1.split(indices, targets))
 
-    # 2) Val (20% total) vs Test (20% total) a partir do Temp (metade/metade)
+    # Val (20%) vs Test (20%) from Temp split
     temp_targets = [targets[i] for i in temp_idx]
     sss2 = StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=seed)
     val_rel, test_rel = next(sss2.split(list(range(len(temp_idx))), temp_targets))
@@ -127,13 +135,11 @@ def make_stratified_splits(dataset, seed=42):
     return train_idx, val_idx, test_idx
 
 def calculate_auc_and_specificity(y_true, y_pred):
-    # Calculate AUC Score
     try:
         auc_score = roc_auc_score(y_true, y_pred)
     except ValueError:
-        auc_score = 0.0 # Handle case with only one class
+        auc_score = 0.0  # Only one class present
 
-    # Calculate Specificity
     # Specificity = TN / (TN + FP)
     true_negatives = sum((1 for true, pred in zip(y_true, y_pred) if true == 0 and pred == 0))
     false_positives = sum((1 for true, pred in zip(y_true, y_pred) if true == 0 and pred == 1))
@@ -152,7 +158,6 @@ def accuracy_fnc(y_true, y_pred):
     return correct / total
 
 def run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_loader, val_loader, writer=None, fold_path=None):
-    # If writer is None (Simple mode), create a default one or handle appropriately
     if writer is None:
         writer = SummaryWriter(TENSORBOARD_LOG)
         
@@ -165,7 +170,7 @@ def run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_loader
         train_epoch_accuracy = 0
         
         train_bar = tqdm(enumerate(train_loader), total=len(train_loader), leave=False)
-        if fold_path: # KFold mode description
+        if fold_path:
             train_bar.set_description(f'Fold {actual_fold} - Training Progress (Epoch {epoch+1}/{EPOCHS})')
         else:
             train_bar.set_description(f'Training Progress (Epoch {epoch+1}/{EPOCHS})')
@@ -227,19 +232,14 @@ def run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_loader
         writer.add_scalar('Validation/Epoch_Accuracy', val_epoch_accuracy, epoch)
         
         if REDUCELRONPLATEAU:
-            scheduler.step(mean_loss_validation) # Usually monitors validation loss
+            scheduler.step(mean_loss_validation)
         
-        # Checkpoint logic
+        # Save checkpoints
         if fold_path:
-             # KFold saves at the end of fold usually, but can save intermediate
-             pass 
+             pass  # KFold saves at end of fold
         else:
-             # Simple mode saves every 10 epochs
              if epoch % 10 == 0:
                 torch.save(model.state_dict(), MODEL_SAVING_PATH)
-        
-        # Clear console (optional, keeping it simple)
-        # os.system('cls' if os.name == 'nt' else 'clear')
 
 def test_model(model, test_loader):
     y_true = []
@@ -271,11 +271,11 @@ def main():
         normalize
     ])    
 
-    print('Iniciada a leitura dos dados...')
+    print('Loading dataset...')
     
-    # K-FOLD LOGIC
+    # K-Fold cross-validation
     if USE_KFOLD:
-        full_dataset = ImageFolder(DATASET_PATH, transform=None) # Transform applied in CustomDataset
+        full_dataset = ImageFolder(DATASET_PATH, transform=None)
         kfold = KFold(n_splits=NFOLDS, shuffle=True, random_state=SEED)
         
         kfold_y_true = []
@@ -292,6 +292,9 @@ def main():
             
             model = utils.load_model(MODEL, len(full_dataset.classes))
             model.to(DEVICE)
+            
+            if len(GPU_IDS) > 1 and torch.cuda.device_count() > 1:
+                model = torch.nn.DataParallel(model, device_ids=GPU_IDS)
 
             criterion = torch.nn.CrossEntropyLoss()
             optimizer = torch.optim.Adam(model.parameters(), lr=LR, betas=BETAS_LR)
@@ -301,11 +304,10 @@ def main():
             else:
                 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.1, patience=10000)
 
-            # Split Data
             train_data = [full_dataset[i] for i in train_ids]
             test_data = [full_dataset[i] for i in test_ids]
             
-            # Apply Augmentation (only for training data)
+            # Apply augmentation to training data
             train_data = utils.apply_augmentation(train_data)
             
             random.shuffle(train_data)
@@ -317,19 +319,15 @@ def main():
             train_loader = DataLoader(selected_train_subset, batch_size=BATCH_SIZE, shuffle=True)
             val_test_loader = DataLoader(selected_test_val_subset, batch_size=BATCH_SIZE, shuffle=False)
             
-            # Train
             run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_loader, val_test_loader, writer, actual_fold_path)
             
-            # Test
             y_true, y_pred = test_model(model, val_test_loader)
             kfold_y_true += y_true
             kfold_y_pred += y_pred
             
-            # Save Model per Fold
             torch.save(model.state_dict(), actual_fold_path.joinpath(TRAIN_NAME + '.pth'))
             print(f"Fold {actual_fold} model saved.")
 
-        # Final KFold Report
         print('\n\nK-Fold Classification Report')
         report = classification_report(kfold_y_true, kfold_y_pred, digits=4)
         print(report)
@@ -348,17 +346,14 @@ def main():
         with open(OUTPUT_PATH / 'GT_vs_Predictions.json', 'w') as f:
             json.dump(GT_vs_Predictions, f)
 
-    # SIMPLE SPLIT LOGIC
+    # Simple train/val/test split
     else:
-        # Load Datasets
         if USE_CROPPED_IMAGES:
-            # Cropped Simple: Pre-split folders
             train_dataset = ImageFolder(DATASET_PATH / "train", transform=transform)
             val_dataset = ImageFolder(DATASET_PATH / "val", transform=transform)
             test_dataset = ImageFolder(DATASET_PATH / "test", transform=transform)
             num_classes = len(train_dataset.classes)
         else:
-            # Full Simple: Single folder + Stratified Split
             full_dataset = ImageFolder(DATASET_PATH, transform=transform)
             num_classes = len(full_dataset.classes)
             print(f'Classes ({num_classes}): {full_dataset.classes}')
@@ -368,13 +363,15 @@ def main():
             val_dataset = Subset(full_dataset, val_idx)
             test_dataset = Subset(full_dataset, test_idx)
 
-        # DataLoaders
         train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
         model = utils.load_model(MODEL, num_classes)
         model.to(DEVICE)
+
+        if len(GPU_IDS) > 1 and torch.cuda.device_count() > 1:
+            model = torch.nn.DataParallel(model, device_ids=GPU_IDS)
 
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=LR)
@@ -384,10 +381,8 @@ def main():
         else:
             scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.1, patience=10000)
 
-        # Train
         run_train_on_all_epochs(model, criterion, optimizer, scheduler, train_loader, val_loader)
 
-        # Test
         print('\n\nClassification Report')
         y_true, y_pred = test_model(model, test_loader)
         report = classification_report(y_true, y_pred, digits=4)

@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Preparação de dados 3-D — modos 1-5
+3-D Data Preparation - Modes 1-5
 ===================================
-• **Modo 5 (novo, corrigido)**  
-  Cria, em *train/* e *test/*, uma subpasta por **classe** (label) e,
-  dentro dela, uma subpasta por **paciente** contendo três arquivos
-  .npy (Axial, Coronal, Sagital) com 64 slices centralizadas
-  (mesma lógica do modo 4).
+Mode 5 creates class-based folders in train/test, with a patient subfolder
+inside each class containing three .npy files (Axial, Coronal, Sagittal)
+with 64 centered slices.
 
-Estrutura-alvo (exemplo)
-------------------------
+Example structure:
 output_folder/
 └── train/
     ├── 0/
@@ -21,9 +18,7 @@ output_folder/
     └── 1/
         ├── Paciente00034/
         │   └── …
-        └── (classe 1 em *test* ainda tem a subpasta “i”, se aplicável)
-
-Autor: você 😊  |  Data: 23-abr-2025
+        └── (test class 1 may have an 'i' subfolder if needed)
 """
 # ======================================================================
 # IMPORTS
@@ -37,22 +32,22 @@ import math
 from tqdm import tqdm
 
 # ======================================================================
-# FUNÇÕES AUXILIARES
+# HELPER FUNCTIONS
 # ======================================================================
 def normalize_to_255(array_slice: np.ndarray) -> np.ndarray:
-    """Normaliza uma fatia 2-D para uint8 em [0, 255]."""
+    """Normalize a 2D slice to uint8 in [0, 255]."""
     arr = array_slice.astype(np.float32)
     min_val, max_val = arr.min(), arr.max()
     if max_val > min_val:
         arr = (arr - min_val) / (max_val - min_val)
-    else:                       # volume constante → zero
+    else:
         arr = arr - min_val
     arr *= 255.0
     return arr.astype(np.uint8)
 
 
 def get_3_views(im_data: np.ndarray, cx: int, cy: int, cz: int):
-    """Retorna axial, coronal e sagital normalizados que cruzam (cx, cy, cz)."""
+    """Returns normalized axial, coronal, and sagittal slices crossing (cx, cy, cz)."""
     axial    = normalize_to_255(im_data[:, :, cz])
     coronal  = normalize_to_255(im_data[:, cy, :])
     sagittal = normalize_to_255(im_data[cx, :, :])
@@ -60,15 +55,15 @@ def get_3_views(im_data: np.ndarray, cx: int, cy: int, cz: int):
 
 
 # ======================================================================
-# CONFIGURAÇÕES
+# CONFIGURATION
 # ======================================================================
-# 1 – segmentações; 2 – aleatório; 3 – centro da segmentação
-# 4 – stack único (vista); 5 – três vistas, 64 fatias cada
-data_collection_mode = 5                 # <<< use 1..5
+# 1 = segmentations; 2 = random; 3 = center of segmentation
+# 4 = single stack (view); 5 = three views, 64 slices each
+data_collection_mode = 5
 
-selected_view    = "3_Views"             # só afeta o modo 4
-stack_size_mode4 = 64                    # modo 4
-stack_size_mode5 = 64                    # modo 5 (fixo)
+selected_view    = "3_Views"  # only affects mode 4
+stack_size_mode4 = 64         # mode 4
+stack_size_mode5 = 64         # mode 5 (fixed)
 
 excel_ref      = r"C:\Gigasistemica\Datasets\3D\Dados_clínicos_densitométricos_pacientes.xlsx"
 col_ref_output = "Diagnosticounificado"
@@ -77,10 +72,10 @@ col_number     = "Número da TC"
 folder_imgs   = r"C:\Gigasistemica\Datasets\3D\Scene3DSlicer_avaliacao_Lorena_osteoporose"
 output_folder = rf"TM_3D_64Stacks_{selected_view}"
 
-train_split   = 0.8                      # 80 % treino | 20 % teste
+train_split   = 0.8  # 80% train | 20% test
 
 # ======================================================================
-# PREPARA DIRETÓRIOS BASE
+# PREPARE BASE DIRECTORIES
 # ======================================================================
 df = pd.read_excel(excel_ref)
 
@@ -96,9 +91,9 @@ train_patients = set(patients[:train_size])
 test_patients  = set(patients[train_size:])
 
 # ======================================================================
-# LOOP PRINCIPAL
+# MAIN LOOP
 # ======================================================================
-for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
+for patient_folder_name in tqdm(patients, desc="Processing patients"):
     patient_id = patient_folder_name.replace("Paciente", "")
 
     try:
@@ -108,10 +103,10 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
 
     split = "train" if patient_folder_name in train_patients else "test"
 
-    # ------------------- label / classe --------------------
+    # Get label/class
     row = df[df[col_number] == patient_id_lookup]
     if row.empty:
-        print(f"► Sem info no Excel para {patient_id}, pulando…")
+        print(f"► No Excel info for {patient_id}, skipping…")
         continue
 
     try:
@@ -120,25 +115,25 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
         diagnostic_label = str(row.iloc[0][col_ref_output]).strip()
     diagnostic_label_str = str(diagnostic_label)
 
-    # ------------------- caminhos -------------------------
+    # File paths
     patient_folder = os.path.join(folder_imgs, patient_folder_name)
     seg_path = os.path.join(patient_folder, "Segmentation.seg.nrrd")
     img_path = os.path.join(patient_folder, "0 Unnamed Series.nrrd")
 
-    # ------------------- existência -----------------------
+    # Check file existence
     if data_collection_mode == 1 and not (os.path.exists(seg_path) and os.path.exists(img_path)):
-        print(f"► Arquivos ausentes (modo 1) para {patient_id}, pulando…"); continue
+        print(f"► Missing files (mode 1) for {patient_id}, skipping…"); continue
     elif data_collection_mode == 2 and not os.path.exists(img_path):
-        print(f"► Sem imagem (modo 2) para {patient_id}, pulando…"); continue
+        print(f"► No image (mode 2) for {patient_id}, skipping…"); continue
     elif data_collection_mode == 3 and not (os.path.exists(seg_path) and os.path.exists(img_path)):
-        print(f"► Sem seg/img (modo 3) para {patient_id}, pulando…"); continue
+        print(f"► No seg/img (mode 3) for {patient_id}, skipping…"); continue
     elif data_collection_mode == 4 and not os.path.exists(img_path):
-        print(f"► Sem imagem (modo 4) para {patient_id}, pulando…"); continue
+        print(f"► No image (mode 4) for {patient_id}, skipping…"); continue
     elif data_collection_mode == 5 and not os.path.exists(img_path):
-        print(f"► Sem imagem (modo 5) para {patient_id}, pulando…"); continue
+        print(f"► No image (mode 5) for {patient_id}, skipping…"); continue
 
     # -----------------------------------------------------------
-    # MODO 1 — SEGMENTAÇÕES COMPLETAS
+    # MODE 1 - COMPLETE SEGMENTATIONS
     # -----------------------------------------------------------
     if data_collection_mode == 1:
         seg_data, _ = nrrd.read(seg_path)
@@ -147,7 +142,7 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
         unique_seg_values = np.unique(seg_data)
         unique_seg_values = unique_seg_values[unique_seg_values > 0]
         if len(unique_seg_values) == 0:
-            print(f"► Nenhuma segmentação em {patient_id}, pulando…")
+            print(f"► No segmentation in {patient_id}, skipping…")
             continue
 
         label_dir = os.path.join(output_folder, split, diagnostic_label_str)
@@ -167,23 +162,23 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
 
             fname = f"stack_{patient_id}_{diagnostic_label_str}_{seg_value_int}.npy"
             np.save(os.path.join(label_dir, fname), stack_array)
-            print(f"[Modo 1] seg={seg_value_int} salvo → {patient_id} ({split})")
+            print(f"[Mode 1] seg={seg_value_int} saved → {patient_id} ({split})")
 
     # -----------------------------------------------------------
-    # MODO 2 — STACKS ALEATÓRIOS
+    # MODE 2 - RANDOM STACKS
     # -----------------------------------------------------------
     elif data_collection_mode == 2:
         im_data, _ = nrrd.read(img_path)
         total_slices = im_data.shape[-1]
 
         if total_slices < 10:
-            print(f"► Poucas fatias em {patient_id}, pulando…")
+            print(f"► Too few slices in {patient_id}, skipping…")
             continue
 
         lower_bound = int(total_slices * 0.1) + 4
         upper_bound = int(total_slices * 0.9) - 4
         if lower_bound > upper_bound:
-            print(f"► Intervalo inválido em {patient_id}, pulando…")
+            print(f"► Invalid range in {patient_id}, skipping…")
             continue
 
         label_dir = os.path.join(output_folder, split, diagnostic_label_str)
@@ -200,10 +195,10 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
 
             fname = f"stack_{patient_id}_{diagnostic_label_str}_{stack_num}.npy"
             np.save(os.path.join(label_dir, fname), stack_array)
-            print(f"[Modo 2] stack={stack_num} salvo → {patient_id} ({split})")
+            print(f"[Mode 2] stack={stack_num} saved → {patient_id} ({split})")
 
     # -----------------------------------------------------------
-    # MODO 3 — 3 VISTAS NO CENTRO DA SEGMENTAÇÃO
+    # MODE 3 - 3 VIEWS AT SEGMENTATION CENTER
     # -----------------------------------------------------------
     elif data_collection_mode == 3:
         seg_data, _ = nrrd.read(seg_path)
@@ -212,7 +207,7 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
         unique_seg_values = np.unique(seg_data)
         unique_seg_values = unique_seg_values[unique_seg_values > 0]
         if len(unique_seg_values) == 0:
-            print(f"► Nenhuma segmentação em {patient_id}, pulando…")
+            print(f"► No segmentation in {patient_id}, skipping…")
             continue
 
         label_dir = os.path.join(output_folder, split, diagnostic_label_str)
@@ -234,10 +229,10 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
             fname = f"stack_{patient_id}_{diagnostic_label_str}_{int(seg_value)}_views.npz"
             np.savez(os.path.join(label_dir, fname),
                      axial=axial, coronal=coronal, sagittal=sagittal)
-            print(f"[Modo 3] seg={int(seg_value)} salvo → {patient_id} ({split})")
+            print(f"[Mode 3] seg={int(seg_value)} saved → {patient_id} ({split})")
 
     # -----------------------------------------------------------
-    # MODO 4 — STACK ÚNICO NA VISTA ESCOLHIDA
+    # MODE 4 - SINGLE STACK IN SELECTED VIEW
     # -----------------------------------------------------------
     elif data_collection_mode == 4:
         im_data, _ = nrrd.read(img_path)
@@ -254,7 +249,7 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
         elif selected_view == "Sagital":
             axis = 0; extractor = lambda idx: im_data[idx, :, :]
         else:
-            print(f"► Vista inválida ({selected_view}) em {patient_id}, pulando…")
+            print(f"► Invalid view ({selected_view}) in {patient_id}, skipping…")
             continue
 
         total = im_data.shape[axis]
@@ -265,7 +260,7 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
         end   = central + upper
 
         if start < 0 or end > total:
-            print(f"► Índices fora do range em {patient_id}, pulando…")
+            print(f"► Indices out of range in {patient_id}, skipping…")
             continue
 
         stack = [normalize_to_255(extractor(idx)) for idx in range(start, end)]
@@ -273,10 +268,10 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
 
         fname = f"stack_{patient_id}_{diagnostic_label_str}_mode4_{selected_view}.npy"
         np.save(os.path.join(label_dir, fname), stack_array)
-        print(f"[Modo 4] {selected_view:7} salvo → {patient_id} ({split})")
+        print(f"[Mode 4] {selected_view:7} saved → {patient_id} ({split})")
 
     # -----------------------------------------------------------
-    # MODO 5 — 64 FATIAS NAS 3 VISTAS (CORRIGIDO)
+    # MODE 5 - 64 SLICES IN 3 VIEWS (CORRECTED)
     # -----------------------------------------------------------
     elif data_collection_mode == 5:
         im_data, _ = nrrd.read(img_path)
@@ -287,30 +282,30 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
             "Sagital": (0, lambda idx: im_data[idx, :, :]),
         }
 
-        # ——> pasta por classe
+        # Create class folder
         label_dir = os.path.join(output_folder, split, diagnostic_label_str)
         if split == "test" and diagnostic_label_str == "1":
             label_dir = os.path.join(label_dir, "i")
         os.makedirs(label_dir, exist_ok=True)
 
-        # ——> pasta por paciente dentro da classe
+        # Create patient folder inside class
         patient_dir = os.path.join(label_dir, f"Paciente{patient_id}")
         os.makedirs(patient_dir, exist_ok=True)
 
         for view_name, (axis, extractor) in views.items():
             total = im_data.shape[axis]
             if total < stack_size_mode5:
-                print(f"► {view_name}: poucas fatias em {patient_id}, pulando vista.")
+                print(f"► {view_name}: too few slices in {patient_id}, skipping view.")
                 continue
 
             central = total // 2
             lower   = stack_size_mode5 // 2
             upper   = stack_size_mode5 - lower
             start   = central - lower
-            end     = central + upper   # exclusivo
+            end     = central + upper
 
             if start < 0 or end > total:
-                print(f"► {view_name}: índices fora do range em {patient_id}.")
+                print(f"► {view_name}: indices out of range in {patient_id}.")
                 continue
 
             stack = [normalize_to_255(extractor(idx)) for idx in range(start, end)]
@@ -318,6 +313,6 @@ for patient_folder_name in tqdm(patients, desc="Processando pacientes"):
 
             fname = f"stack_{patient_id}_{diagnostic_label_str}_{view_name}.npy"
             np.save(os.path.join(patient_dir, fname), stack_array)
-            print(f"[Modo 5] {view_name:7} salvo → {patient_id} ({split})")
+            print(f"[Mode 5] {view_name:7} saved → {patient_id} ({split})")
 
-print(">>> Processamento concluído! ✅")
+print(">>> Processing complete! ✅")
