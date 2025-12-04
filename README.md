@@ -95,7 +95,7 @@ The codes operate for networks trained with both complete images and those train
 
 Below are two examples of the visualizations that will be available in the provided codes: the first one for complete radiographs and the second one for radiograph crops.
 
-![](https://i.ibb.co/RpbzTgJY/Osteo1.png)
+![](https://raw.githubusercontent.com/GIGASISTEMICA/GigaSistemica-Advancing-Systemic-Health-Diagnostics-through-AI/refs/heads/main/static/osteo1_grad.png)
 
 ![](https://i.ibb.co/prkg6VXf/Osteo2.png)
 
@@ -128,7 +128,7 @@ Below are two examples of output, obtained from a panoramic radiograph of the au
 
 **Output Images (Grad-CAM and Overlay respectively):**
 
-![Grad-CAM and Overlay](https://i.ibb.co/gMB952P5/OsteoMe.png)
+![Grad-CAM and Overlay](https://raw.githubusercontent.com/GIGASISTEMICA/GigaSistemica-Advancing-Systemic-Health-Diagnostics-through-AI/refs/heads/main/static/osteo3_inference.png)
 
 **Output JSON:**
 
